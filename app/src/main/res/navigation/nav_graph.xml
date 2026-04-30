@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.example.expensemanager.ui.SplashFragment"
+        android:label="Splash"
+        tools:layout="@layout/fragment_splash">
+        <action
+            android:id="@+id/action_splash_to_auth"
+            app:destination="@id/authFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_splash_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/authFragment"
+        android:name="com.example.expensemanager.ui.AuthFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_auth">
+        <action
+            android:id="@+id/action_auth_to_houseSetup"
+            app:destination="@id/houseSetupFragment" />
+        <action
+            android:id="@+id/action_auth_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/authFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/houseSetupFragment"
+        android:name="com.example.expensemanager.ui.HouseSetupFragment"
+        android:label="Setup House"
+        tools:layout="@layout/fragment_house_setup">
+        <action
+            android:id="@+id/action_houseSetup_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/authFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.example.expensemanager.ui.DashboardFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_dashboard">
+        <action
+            android:id="@+id/action_dashboard_to_addAsset"
+            app:destination="@id/addAssetFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_vault"
+            app:destination="@id/vaultFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_members"
+            app:destination="@id/membersFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addAssetFragment"
+        android:name="com.example.expensemanager.ui.AddAssetFragment"
+        android:label="Add Asset"
+        tools:layout="@layout/fragment_add_asset" />
+
+    <fragment
+        android:id="@+id/vaultFragment"
+        android:name="com.example.expensemanager.ui.VaultFragment"
+        android:label="Warranty Vault"
+        tools:layout="@layout/fragment_vault">
+        <action
+            android:id="@+id/action_vault_to_camera"
+            app:destination="@id/cameraFragment" />
+        <action
+            android:id="@+id/action_vault_to_addVaultItem"
+            app:destination="@id/addVaultItemFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/cameraFragment"
+        android:name="com.example.expensemanager.ui.CameraFragment"
+        android:label="Camera"
+        tools:layout="@layout/fragment_camera">
+        <argument
+            android:name="houseId"
+            app:argType="string" />
+        <argument
+            android:name="warrantyItemId"
+            android:defaultValue=""
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addVaultItemFragment"
+        android:name="com.example.expensemanager.ui.AddVaultItemFragment"
+        android:label="Add Item"
+        tools:layout="@layout/fragment_add_vault_item" />
+
+    <fragment
+        android:id="@+id/membersFragment"
+        android:name="com.example.expensemanager.ui.MembersFragment"
+        android:label="Members"
+        tools:layout="@layout/fragment_members" />
+
+</navigation>

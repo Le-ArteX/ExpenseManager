@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FlatShare</string>
+    <string name="app_tagline">Manage your flat bills together</string>
+    <!-- Auth screen -->
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email_hint">Email Address</string>
+    <string name="password_hint">Password</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="display_name_hint">Your Name</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="sign_in_with_google">Continue with Google</string>
+    <string name="or_divider">OR</string>
+    <!-- House setup -->
+    <string name="create_house">Create New House</string>
+    <string name="join_house">Join with Invite Code</string>
+    <string name="house_name_hint">House Name (e.g. Mirpur-10 Flat B)</string>
+    <string name="address_hint">Address</string>
+    <string name="invite_code_hint">6-Digit Invite Code</string>
+    <!-- Dashboard -->
+    <string name="pending_bills">Pending Bills</string>
+    <string name="all_filter">All</string>
+    <string name="utility_filter">Utility</string>
+    <string name="streaming_filter">Streaming</string>
+    <string name="maintenance_filter">Maintenance</string>
+    <string name="add_asset">Add Asset</string>
+    <string name="no_pending_bills">No pending bills!</string>
+    <string name="tap_to_add">Tap + to add a shared asset</string>
+    <!-- Asset categories -->
+    <string name="cat_streaming">Streaming</string>
+    <string name="cat_utility">Utility</string>
+    <string name="cat_maintenance">Maintenance</string>
+    <string name="cat_other">Other</string>
+    <!-- Add Asset form -->
+    <string name="asset_name_hint">Asset Name (e.g. Grameenphone WiFi)</string>
+    <string name="amount_hint">Total Amount (BDT)</string>
+    <string name="due_day_hint">Due Day (1-28)</string>
+    <string name="notes_hint">Notes (optional)</string>
+    <string name="split_among">Split Among</string>
+    <string name="add_asset_btn">Add Asset and Schedule Bill</string>
+    <!-- Vault -->
+    <string name="warranty_vault">Warranty Vault</string>
+    <string name="add_item">Add Item</string>
+    <string name="item_name_hint">Item Name (e.g. Samsung Fridge)</string>
+    <string name="brand_hint">Brand</string>
+    <string name="purchase_date">Purchase Date</string>
+    <string name="warranty_expiry">Warranty Expiry Date</string>
+    <string name="purchase_price">Purchase Price (BDT)</string>
+    <string name="snap_receipt">Snap a Receipt</string>
+    <string name="receipt_saved">Receipt saved!</string>
+    <!-- Members -->
+    <string name="members">Members</string>
+    <string name="invite_code_label">Invite Code</string>
+    <string name="copy_code">Copy</string>
+    <string name="invite_copied">Invite code copied!</string>
+    <string name="admin_label">Admin</string>
+    <!-- Common -->
+    <string name="loading">Please wait...</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="mark_paid">Mark My Share as Paid</string>
+    <string name="paid_success">Marked as paid!</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="no_internet">No internet connection</string>
+    <!-- Firebase error messages -->
+    <string name="error_email_exists">This email is already registered</string>
+    <string name="error_wrong_password">Incorrect password</string>
+    <string name="error_user_not_found">No account found with this email</string>
+    <string name="error_too_many_requests">Too many attempts. Please wait.</string>
+    <string name="reset_email_sent">Password reset email sent!</string>
+    <!-- Notification channels -->
+    <string name="notif_channel_name">Bill Reminders</string>
+    <string name="notif_channel_desc">Reminders for shared flat bills</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary teal palette -->
+    <color name="teal_primary">#00695C</color>
+    <color name="teal_dark">#004D40</color>
+    <color name="teal_light">#E0F2F1</color>
+    <color name="teal_mid">#26A69A</color>
+    <!-- Accent colors -->
+    <color name="amber_accent">#FF8F00</color>
+    <color name="amber_light">#FFF8E1</color>
+    <!-- Status colors -->
+    <color name="red_error">#C62828</color>
+    <color name="red_light">#FFEBEE</color>
+    <color name="green_success">#2E7D32</color>
+    <color name="green_light">#E8F5E9</color>
+    <color name="orange_warn">#E65100</color>
+    <!-- Surface colors -->
+    <color name="gray_surface">#FAFAFA</color>
+    <color name="gray_card">#FFFFFF</color>
+    <color name="gray_border">#E0E0E0</color>
+    <color name="gray_light">#F5F5F5</color>
+    <!-- Text colors -->
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#BDBDBD</color>
+    <!-- Utility -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    <!-- Member avatar colors -->
+    <color name="member_red">#E57373</color>
+    <color name="member_blue">#64B5F6</color>
+    <color name="member_green">#81C784</color>
+    <color name="member_orange">#FFB74D</color>
+    <color name="member_purple">#BA68C8</color>
+    <color name="member_teal">#4DB6AC</color>
+</resources>

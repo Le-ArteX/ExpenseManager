@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Base.Theme.ExpenseManager" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary colors -->
+        <item name="colorPrimary">@color/teal_primary</item>
+        <item name="colorPrimaryVariant">@color/teal_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary -->
+        <item name="colorSecondary">@color/amber_accent</item>
+        <item name="colorSecondaryVariant">@color/amber_accent</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Background -->
+        <item name="android:colorBackground">@color/gray_surface</item>
+        <item name="colorSurface">@color/gray_card</item>
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/teal_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <!-- Typography -->
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="Theme.ExpenseManager" parent="Base.Theme.ExpenseManager" />
+
+    <!-- Base application theme -->
+    <style name="Theme.FlatShare" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary colors -->
+        <item name="colorPrimary">@color/teal_primary</item>
+        <item name="colorPrimaryVariant">@color/teal_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary -->
+        <item name="colorSecondary">@color/amber_accent</item>
+        <item name="colorSecondaryVariant">@color/amber_accent</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Background -->
+        <item name="android:colorBackground">@color/gray_surface</item>
+        <item name="colorSurface">@color/gray_card</item>
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/teal_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <!-- Typography -->
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <!-- Splash screen theme (no status bar content) -->
+    <style name="Theme.FlatShare.Splash" parent="Theme.FlatShare">
+        <item name="android:statusBarColor">@color/teal_dark</item>
+        <item name="android:navigationBarColor">@color/teal_dark</item>
+    </style>
+
+    <!-- Tab text style -->
+    <style name="TabTextAppearance" parent="@style/TextAppearance.MaterialComponents.Tab">
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="textAllCaps">false</item>
+    </style>
+</resources>
