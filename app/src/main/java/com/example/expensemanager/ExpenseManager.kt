@@ -5,7 +5,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.PersistentCacheSettings
 import com.google.firebase.firestore.firestoreSettings
-
+//
 class ExpenseManager : Application() {
     override fun onCreate() {
         super.onCreate()
