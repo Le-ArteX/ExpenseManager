@@ -1,55 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/cardVault"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardCornerRadius="14dp" app:cardElevation="2dp"
-    app:cardBackgroundColor="@color/white">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="horizontal" android:padding="14dp"
-        android:gravity="center_vertical">
-        <!-- Item Icon / Thumbnail -->
-        <TextView android:id="@+id/tvItemIcon"
-            android:layout_width="52dp" android:layout_height="52dp"
-            android:text="■" android:textSize="26sp"
-            android:gravity="center"
-            android:background="+@drawable/bg_circle_teal"
-            android:layout_marginEnd="12dp"/>
-        <!-- Info -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:orientation="vertical">
-            <TextView android:id="@+id/tvItemName"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textSize="14sp" android:textStyle="bold" android:textColor="@color/text_primary"/>
-            <TextView android:id="@+id/tvBrand"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textSize="11sp" android:textColor="@color/text_secondary"
-                android:layout_marginTop="1dp"/>
-            <TextView android:id="@+id/tvWarrantyStatus"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textSize="10sp" android:textStyle="bold"
-                android:layout_marginTop="5dp"
-                android:paddingHorizontal="8dp" android:paddingVertical="3dp"
-                android:background="+@drawable/member_chip_paid"/>
-            <TextView android:id="@+id/tvReceiptCount"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textSize="10sp" android:textColor="@color/teal_primary"
-                android:layout_marginTop="4dp"/>
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray_surface">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/teal_dark"
+            app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@color/white"
+            app:title="Add to Vault"
+            app:titleTextColor="@color/white" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/nameLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="Item Name (e.g. Sony TV)"
+                app:boxStrokeColor="@color/teal_primary">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etItemName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/brandLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="Brand"
+                app:boxStrokeColor="@color/teal_primary">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etBrand"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/priceLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="Purchase Price (BDT)"
+                app:boxStrokeColor="@color/teal_primary">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPrice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPurchaseDate"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginBottom="12dp"
+                android:text="Select Purchase Date"
+                app:strokeColor="@color/gray_border"
+                android:textColor="@color/text_primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExpiryDate"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginBottom="24dp"
+                android:text="Select Warranty Expiry"
+                app:strokeColor="@color/gray_border"
+                android:textColor="@color/text_primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubmit"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Add to Vault"
+                android:textStyle="bold"
+                app:backgroundTint="@color/teal_dark"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                app:indicatorColor="@color/teal_primary" />
+
         </LinearLayout>
-        <!-- Price + View -->
-        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:orientation="vertical" android:gravity="end">
-            <TextView android:id="@+id/tvPrice"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textSize="13sp" android:textStyle="bold" android:textColor="@color/text_secondary"/>
-            <TextView android:id="@+id/tvViewReceipt"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="View" android:textSize="11sp"
-                android:textColor="@color/teal_primary"
-                android:layout_marginTop="4dp"
-                android:padding="4dp"/>
-        </LinearLayout>
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -5,48 +5,76 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.example.expensemanager.model.Bill
+import com.example.expensemanager.model.House
+import com.example.expensemanager.model.Member
 import com.example.expensemanager.model.SharedAsset
 import com.example.expensemanager.model.WarrantyItem
 import com.example.expensemanager.repository.AssetRepository
+import com.example.expensemanager.repository.HouseRepository
 import com.example.expensemanager.repository.VaultRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
+
 class AssetViewModel(
     private val assetRepo : AssetRepository = AssetRepository(),
-    private val vaultRepo : VaultRepository = VaultRepository()
+    private val vaultRepo : VaultRepository = VaultRepository(),
+    private val houseRepo : HouseRepository = HouseRepository()
 ) : ViewModel() {
     private val uid get() = Firebase.auth.currentUser?.uid ?: ""
     private val _houseId = MutableStateFlow("")
+
     //  Exposed StateFlows
+    val house: StateFlow<House?> = _houseId
+        .filter { it.isNotEmpty() }
+        .flatMapLatest { houseRepo.listenHouse(it) }
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    val members: StateFlow<List<Member>> = _houseId
+        .filter { it.isNotEmpty() }
+        .flatMapLatest { houseRepo.listenMembers(it) }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     val pendingBills: StateFlow<List<Bill>> = _houseId
         .filter { it.isNotEmpty() }
         .flatMapLatest { assetRepo.getPendingBills(it) }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     val assets: StateFlow<List<SharedAsset>> = _houseId
         .filter { it.isNotEmpty() }
         .flatMapLatest { assetRepo.getAssets(it) }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     val warrantyItems: StateFlow<List<WarrantyItem>> = _houseId
         .filter { it.isNotEmpty() }
         .flatMapLatest { vaultRepo.getWarrantyItems(it) }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     val totalMonthly: StateFlow<Double> = assets
         .map { it.sumOf { a -> a.monthlyAmount } }
         .stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
+
     val myTotalDue: StateFlow<Double> = pendingBills
         .map { bills -> bills.filter { !it.isPaidBy(uid) }.sumOf { it.perPersonAmount() } }
         .stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
+
+    val myTotalPaid: StateFlow<Double> = pendingBills
+        .map { bills -> bills.filter { it.isPaidBy(uid) }.sumOf { it.perPersonAmount() } }
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
+
     // Category filter
     private val _filter = MutableStateFlow("ALL")
     val filteredBills: StateFlow<List<Bill>> = combine(pendingBills, _filter) { bills, f ->
         if (f == "ALL") bills else bills.filter { it.category == f }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState
+
     //  Actions
     fun setHouseId(id: String) { _houseId.value = id }
     fun setFilter(f: String)   { _filter.value = f }
+
     fun addAsset(name: String, category: String, amount: Double,
                  dueDay: Int, members: List<String>, notes: String) {
         viewModelScope.launch {
@@ -60,6 +88,7 @@ class AssetViewModel(
             else UiState.Error(r.exceptionOrNull()?.message ?: "Failed")
         }
     }
+
     fun markPaid(billId: String) {
         viewModelScope.launch {
             val r = assetRepo.markMemberPaid(_houseId.value, billId, uid)
@@ -67,6 +96,7 @@ class AssetViewModel(
                 _uiState.value = UiState.Error("Could not mark as paid. Please retry.")
         }
     }
+
     fun addWarrantyItem(item: WarrantyItem, photoFile: File?) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
@@ -83,7 +113,9 @@ class AssetViewModel(
             }
         }
     }
+
     fun resetState() { _uiState.value = UiState.Idle }
+
     sealed class UiState {
         object Idle    : UiState()
         object Loading : UiState()

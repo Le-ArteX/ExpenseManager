@@ -152,7 +152,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
         android:text="Add Asset"
-        app:icon="+@drawable/ic_add"
+        app:icon="@drawable/ic_add"
         app:backgroundTint="@color/teal_dark"
         android:textColor="@color/white"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -11,16 +11,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.snackbar.Snackbar
 import com.example.expensemanager.R
 import com.example.expensemanager.adapter.BillAdapter
 import com.example.expensemanager.databinding.FragmentDashboardBinding
 import com.example.expensemanager.util.PrefsManager
 import com.example.expensemanager.viewmodel.AssetViewModel
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
-
-
-private val adapter: Any
 
 class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
@@ -28,6 +26,7 @@ class DashboardFragment : Fragment() {
     private val viewModel: AssetViewModel by viewModels()
     private lateinit var billAdapter: BillAdapter
     private lateinit var prefs: PrefsManager
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?, savedInstanceState: Bundle?
@@ -39,12 +38,15 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         prefs = PrefsManager(requireContext())
+        
         // Set houseId in ViewModel — triggers data loading
         viewModel.setHouseId(prefs.houseId)
+        
         setupToolbar()
         setupRecyclerView()
         setupFilters()
         observeData()
+        
         binding.fabAdd.setOnClickListener {
             findNavController().navigate(R.id.action_dashboard_to_addAsset)
         }
@@ -56,7 +58,7 @@ class DashboardFragment : Fragment() {
 
     private fun setupRecyclerView() {
         billAdapter = BillAdapter(
-            currentUserId = com.google.firebase.auth.ktx.auth.currentUser?.uid ?: "",
+            currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
             onPayClick = { bill -> viewModel.markPaid(bill.id) }
         )
         binding.rvBills.adapter = billAdapter
@@ -97,30 +99,23 @@ class DashboardFragment : Fragment() {
                     }
                 }
                 launch {
+                    viewModel.myTotalPaid.collect { paid ->
+                        binding.tvPaidAmount.text = " %.0f".format(paid)
+                    }
+                }
+                launch {
                     viewModel.uiState.collect { state ->
                         when (state) {
                             is AssetViewModel.UiState.Success -> {
-                                Snackbar.make(
-                                    binding.root, state.message,
-                                    Snackbar.LENGTH_LONG
-                                ).show()
+                                Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                                 viewModel.resetState()
                             }
-
                             is AssetViewModel.UiState.Error -> {
-                                Snackbar.make(
-                                    binding.root, state.message,
-                                    Snackbar.LENGTH_LONG
-                                )
-                                    .setBackgroundTint(
-                                        ContextCompat.getColor(
-                                            requireContext(), R.color.red_error
-                                        )
-                                    )
+                                Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG)
+                                    .setBackgroundTint(ContextCompat.getColor(requireContext(), R.color.red_error))
                                     .show()
                                 viewModel.resetState()
                             }
-
                             else -> {}
                         }
                     }
@@ -130,6 +125,7 @@ class DashboardFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView(); _binding = null
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -1,5 +1,7 @@
 package com.example.expensemanager.model
+
 import com.google.firebase.Timestamp
+
 data class SharedAsset(
     val id: String = "",
     val houseId: String = "",
@@ -13,15 +15,25 @@ data class SharedAsset(
     val isActive: Boolean = true,
     val createdBy: String = ""
 ) {
+
     /** Cost each member pays */
     fun perPersonAmount(): Double =
         if (splitAmong.isEmpty()) monthlyAmount
         else monthlyAmount / splitAmong.size
+
     /** Emoji icon for this category */
     fun categoryIcon(): String = when (category) {
-        "SUBSCRIPTION"  -> " "
-        "UTILITY"       -> " "
-        "MAINTENANCE"   -> " "
-        else            -> " "
+        "SUBSCRIPTION" -> "📺"
+        "UTILITY"      -> "⚡"
+        "MAINTENANCE"  -> "🛠️"
+        else           -> "💰"
+    }
+
+    /** Display name for the category */
+    fun categoryDisplayName(): String = when (category) {
+        "SUBSCRIPTION" -> "Streaming"
+        "UTILITY"      -> "Utility"
+        "MAINTENANCE"  -> "Maintenance"
+        else           -> "Other"
     }
 }
