@@ -67,7 +67,7 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent" android:layout_height="52dp"
             android:text="@string/sign_in_with_google"
-            app:icon="+@drawable/ic_google"
+            app:icon="@drawable/ic_google"
             app:iconGravity="textStart" app:iconPadding="12dp"
             app:strokeColor="@color/gray_border"
             app:cornerRadius="12dp"

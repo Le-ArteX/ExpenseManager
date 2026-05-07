@@ -49,7 +49,7 @@
                 android:layout_height="4dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="14dp"
-                android:background="+@color/text_hint"/>
+                android:background="@color/text_hint"/>
             <!-- Tabs: Login | Register -->
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
@@ -60,7 +60,7 @@
                 android:layout_marginBottom="8dp"
                 app:tabIndicatorColor="@color/teal_primary"
                 app:tabSelectedTextColor="@color/teal_dark"
-                app:tabUnselectedTextColor="@color/text_secondary"
+                app:tabTextColor="@color/text_secondary"
                 app:tabTextAppearance="@style/TabTextAppearance">
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"

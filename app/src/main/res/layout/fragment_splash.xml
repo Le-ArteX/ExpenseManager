@@ -21,7 +21,7 @@
             android:text="■"
             android:textSize="48sp"
             android:gravity="center"
-            android:background="+@drawable/bg_circle_teal"
+            android:background="@drawable/bg_circle_teal"
             android:layout_marginBottom="20dp"/>
         <!-- App Name -->
         <TextView

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -13,7 +14,7 @@
             android:layout_width="42dp" android:layout_height="42dp"
             android:gravity="center" android:textSize="16sp"
             android:textStyle="bold" android:textColor="@color/white"
-            android:background="+@drawable/bg_circle_teal"
+            android:background="@drawable/bg_circle_teal"
             android:layout_marginEnd="12dp"/>
         <!-- Name + Email -->
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
@@ -30,7 +31,7 @@
                     android:text="@string/admin_label"
                     android:textSize="9sp" android:textStyle="bold"
                     android:textColor="@color/teal_dark"
-                    android:background="+@drawable/member_chip_paid"
+                    android:background="@drawable/member_chip_paid"
                     android:paddingHorizontal="6dp" android:paddingVertical="2dp"
                     android:visibility="gone"/>
             </LinearLayout>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/dashboardFragment"
-        android:icon="+@drawable/ic_home"
+        android:icon="@drawable/ic_launcher_foreground"
         android:title="Home"/>
     <item android:id="@+id/vaultFragment"
-        android:icon="+@drawable/ic_vault"
+        android:icon="@drawable/ic_launcher_foreground"
         android:title="Vault"/>
     <item android:id="@+id/membersFragment"
-        android:icon="+@drawable/ic_members"
+        android:icon="@drawable/ic_launcher_foreground"
         android:title="Members"/>
 </menu>

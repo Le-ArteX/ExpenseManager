@@ -74,7 +74,7 @@
         <!-- PAY BUTTON -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPay"
-            style="@style/Widget.MaterialComponents.Button.TonalButton"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:text="Mark My Share as Paid"
