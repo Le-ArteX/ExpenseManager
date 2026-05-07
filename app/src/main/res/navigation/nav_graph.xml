@@ -35,7 +35,16 @@
             app:destination="@id/dashboardFragment"
             app:popUpTo="@id/authFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_auth_to_forgotPassword"
+            app:destination="@id/forgotPasswordFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.example.expensemanager.ui.ForgotPasswordFragment"
+        android:label="Reset Password"
+        tools:layout="@layout/fragment_forgot_password" />
 
     <fragment
         android:id="@+id/houseSetupFragment"

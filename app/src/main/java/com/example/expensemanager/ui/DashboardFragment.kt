@@ -99,11 +99,6 @@ class DashboardFragment : Fragment() {
                     }
                 }
                 launch {
-                    viewModel.myTotalPaid.collect { paid ->
-                        binding.tvPaidAmount.text = " %.0f".format(paid)
-                    }
-                }
-                launch {
                     viewModel.uiState.collect { state ->
                         when (state) {
                             is AssetViewModel.UiState.Success -> {
