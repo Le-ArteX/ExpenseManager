@@ -28,12 +28,4 @@ data class SharedAsset(
         "MAINTENANCE"  -> "🛠️"
         else           -> "💰"
     }
-
-    /** Display name for the category */
-    fun categoryDisplayName(): String = when (category) {
-        "SUBSCRIPTION" -> "Streaming"
-        "UTILITY"      -> "Utility"
-        "MAINTENANCE"  -> "Maintenance"
-        else           -> "Other"
-    }
 }
