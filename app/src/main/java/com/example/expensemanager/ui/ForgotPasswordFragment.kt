@@ -63,3 +63,7 @@ class ForgotPasswordFragment : Fragment() {
         _binding = null
     }
 }
+
+private fun ValidationUtils.isValidEmail(email: String): Boolean {
+    return validateEmail(email).isSuccess
+}
