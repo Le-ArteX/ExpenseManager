@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
-    id("kotlin-kapt")
+    alias(libs.plugins.androidx.navigation.safeargs)
 }
 
 android {
@@ -45,7 +45,6 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    // Consistently use the newer Material 1.13.0 version
     implementation(libs.google.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)

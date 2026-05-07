@@ -131,8 +131,6 @@ class CameraFragment : Fragment() {
             val result = if (args.warrantyItemId.isNotEmpty()) {
                 vaultRepo.addReceiptToItem(args.houseId, args.warrantyItemId, file)
             } else {
-                // If no item ID, we just upload and maybe return the URL? 
-                // For now, assume we always need an item ID or it's for a new one.
                 vaultRepo.uploadReceiptImage(args.houseId, file)
             }
 
