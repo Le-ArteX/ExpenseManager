@@ -128,7 +128,8 @@ class CameraFragment : Fragment() {
         Toast.makeText(requireContext(), "Uploading receipt...", Toast.LENGTH_SHORT).show()
         
         CoroutineScope(Dispatchers.Main).launch {
-            val result = if (args.warrantyItemId.isNotEmpty()) {
+            // Using args.warrantyItemId != "" to avoid type mismatch error with isNotEmpty()
+            val result = if (args.warrantyItemId != "") {
                 vaultRepo.addReceiptToItem(args.houseId, args.warrantyItemId, file)
             } else {
                 vaultRepo.uploadReceiptImage(args.houseId, file)
