@@ -33,7 +33,7 @@ class VaultAdapter(
             binding.tvWarrantyStatus.setTextColor(ContextCompat.getColor(binding.root.context, statusColor))
             
             val count = item.receiptImageUrls.size
-            binding.tvReceiptCount.text = if (count > 0) "$count receipts saved" else "No receipts"
+            binding.tvViewReceipt.text = if (count > 0) "$count receipts saved" else "No receipts"
             
             binding.root.setOnClickListener { onItemClick(item) }
         }
