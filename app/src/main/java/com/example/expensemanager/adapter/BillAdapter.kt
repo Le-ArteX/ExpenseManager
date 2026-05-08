@@ -1,5 +1,6 @@
 package com.example.expensemanager.adapter
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,22 +24,37 @@ class BillAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(bill: Bill) {
             binding.tvBillName.text = bill.assetName
-            binding.tvAmount.text = " %.0f".format(bill.amount)
-            binding.tvPerPerson.text = " %.0f/person".format(bill.perPersonAmount())
+            binding.tvAmount.text = "৳ %.0f".format(bill.amount)
+            binding.tvPerPerson.text = "৳ %.0f/person".format(bill.perPersonAmount())
             
-            // Due date
+            // Due date and Status text
             val fmt = SimpleDateFormat("MMM d", Locale.getDefault())
             val dueStr = bill.dueDate?.toDate()?.let { fmt.format(it) } ?: "—"
             binding.tvDueDate.text = "Due $dueStr · ${bill.status}"
             
-            // Category icon (Placeholder logic: in a real app, usesetImageResource)
+            // Colors based on status
+            val statusColor = when (bill.status) {
+                "OVERDUE" -> R.color.red_error
+                "PARTIAL" -> R.color.amber_accent
+                "PAID" -> R.color.green_success
+                else -> R.color.teal_mid
+            }
+            val colorInt = ContextCompat.getColor(binding.root.context, statusColor)
+            
+            binding.statusIndicator.setBackgroundColor(colorInt)
+            binding.tvDueDate.setTextColor(colorInt)
+            
+            // Category icon
             val iconRes = when (bill.category) {
-                "SUBSCRIPTION" -> R.drawable.ic_launcher_foreground // Replace with actual icons
-                "UTILITY" -> R.drawable.ic_launcher_foreground
-                "MAINTENANCE" -> R.drawable.ic_launcher_foreground
-                else -> R.drawable.ic_launcher_foreground
+                "SUBSCRIPTION" -> R.drawable.ic_bills // In a real app, use specific icons
+                "UTILITY" -> R.drawable.ic_bills
+                "MAINTENANCE" -> R.drawable.ic_bills
+                else -> R.drawable.ic_bills
             }
             binding.ivCategory.setImageResource(iconRes)
+            binding.ivCategory.imageTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(binding.root.context, R.color.teal_primary)
+            )
             
             // Progress bar
             val paidCount = bill.paidCount()
@@ -46,22 +62,11 @@ class BillAdapter(
             binding.progressPaid.progress = (paidCount * 100) / total
             binding.tvProgressText.text = "$paidCount of $total paid"
             
-            // Status left border color
-            val borderColor = when (bill.status) {
-                "OVERDUE" -> R.color.red_error
-                "PARTIAL" -> R.color.amber_accent
-                "PAID" -> R.color.green_success
-                else -> R.color.red_error
-            }
-            binding.cardBill.strokeColor =
-                ContextCompat.getColor(binding.root.context, borderColor)
-            binding.cardBill.strokeWidth = 4
-            
             // Build member chips
             binding.chipGroupMembers.removeAllViews()
             bill.paidBy.forEach { (memberId, paid) ->
                 val chip = Chip(binding.root.context).apply {
-                    text = memberId.take(6)    // show first 6 chars of UID
+                    text = "Member" // Ideally we'd map UID to name, but for now show placeholder or UID
                     isCheckable = false
                     setChipBackgroundColorResource(
                         if (paid) R.color.green_light else R.color.red_light
@@ -72,7 +77,7 @@ class BillAdapter(
                             if (paid) R.color.green_success else R.color.red_error
                         )
                     )
-                    chipMinHeight = 28f
+                    chipMinHeight = 24f
                     textSize = 9f
                 }
                 binding.chipGroupMembers.addView(chip)

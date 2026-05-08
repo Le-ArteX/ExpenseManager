@@ -163,6 +163,7 @@
                 android:id="@+id/rvMembers"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:nestedScrollingEnabled="false" />
 
         </LinearLayout>

@@ -1,8 +1,8 @@
 package com.example.expensemanager.repository
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.example.expensemanager.model.Bill
@@ -25,46 +25,68 @@ class AssetRepository {
     //  CREATE
     suspend fun addAsset(houseId: String, asset: SharedAsset): Result<SharedAsset> {
         return try {
-            val ref = assetsCol(houseId).add(asset.copy(houseId = houseId, createdBy = uid)).await()
-            val finalAsset = asset.copy(id = ref.id, houseId = houseId, createdBy = uid)
-            ref.set(finalAsset).await()
+            val assetRef = assetsCol(houseId).document()
+            val finalAsset = asset.copy(id = assetRef.id, houseId = houseId, createdBy = uid)
+            assetRef.set(finalAsset).await()
             createBillCycle(houseId, finalAsset)   // auto-schedule first bill
             Result.success(finalAsset)
         } catch (e: Exception) {
+            Log.e("AssetRepo", "Add asset error: ${e.message}")
             Result.failure(Exception("Failed to add asset: ${e.message}"))
         }
     }
 
     //  READ
     fun getAssets(houseId: String): Flow<List<SharedAsset>> = callbackFlow {
+        if (houseId.isEmpty()) {
+            trySend(emptyList())
+            return@callbackFlow
+        }
         val reg = assetsCol(houseId).whereEqualTo("isActive", true)
             .addSnapshotListener { snap, err ->
-                if (err != null) { close(err); return@addSnapshotListener }
+                if (err != null) { 
+                    Log.e("AssetRepo", "Get assets error: ${err.message}")
+                    return@addSnapshotListener 
+                }
                 trySend(snap?.toObjects(SharedAsset::class.java) ?: emptyList())
             }
         awaitClose { reg.remove() }
     }
 
-    // Simplified query to avoid "Index Required" crash
+    // Remove orderBy to avoid index requirement, sort on client-side
     fun getPendingBills(houseId: String): Flow<List<Bill>> = callbackFlow {
+        if (houseId.isEmpty()) {
+            trySend(emptyList())
+            return@callbackFlow
+        }
         val reg = billsCol(houseId)
-            .orderBy("dueDate", Query.Direction.ASCENDING)
             .addSnapshotListener { snap, err ->
-                if (err != null) { close(err); return@addSnapshotListener }
+                if (err != null) { 
+                    Log.e("AssetRepo", "Get bills error: ${err.message}")
+                    return@addSnapshotListener 
+                }
                 val bills = snap?.toObjects(Bill::class.java) ?: emptyList()
-                // Filter status on client-side to avoid index requirement
+                // Filter and sort on client-side
                 val pending = bills.filter { it.status in listOf("PENDING", "PARTIAL", "OVERDUE") }
+                    .sortedBy { it.dueDate }
                 trySend(pending)
             }
         awaitClose { reg.remove() }
     }
 
     fun getAllBills(houseId: String): Flow<List<Bill>> = callbackFlow {
+        if (houseId.isEmpty()) {
+            trySend(emptyList())
+            return@callbackFlow
+        }
         val reg = billsCol(houseId)
-            .orderBy("dueDate", Query.Direction.DESCENDING)
             .addSnapshotListener { snap, err ->
-                if (err != null) { close(err); return@addSnapshotListener }
-                trySend(snap?.toObjects(Bill::class.java) ?: emptyList())
+                if (err != null) { 
+                    Log.e("AssetRepo", "Get all bills error: ${err.message}")
+                    return@addSnapshotListener 
+                }
+                val bills = snap?.toObjects(Bill::class.java) ?: emptyList()
+                trySend(bills.sortedByDescending { it.dueDate })
             }
         awaitClose { reg.remove() }
     }
@@ -73,19 +95,28 @@ class AssetRepository {
     suspend fun markMemberPaid(houseId: String, billId: String, memberId: String): Result<Unit> {
         return try {
             val ref = billsCol(houseId).document(billId)
-            ref.update("paidBy.$memberId", true).await()
-            val bill = ref.get().await().toObject(Bill::class.java)
-            if (bill != null) {
-                val updated = bill.paidBy.toMutableMap().apply { put(memberId, true) }
-                val newStatus = when {
-                    updated.values.all { it } -> "PAID"
-                    updated.values.any { it } -> "PARTIAL"
-                    else -> "PENDING"
-                }
-                ref.update("status", newStatus).await()
+            val snap = ref.get().await()
+            val bill = snap.toObject(Bill::class.java) ?: throw Exception("Bill not found")
+            
+            val updatedPaidBy = bill.paidBy.toMutableMap()
+            updatedPaidBy[memberId] = true
+            
+            val newStatus = when {
+                updatedPaidBy.values.all { it } -> "PAID"
+                updatedPaidBy.values.any { it } -> "PARTIAL"
+                else -> "PENDING"
             }
+            
+            ref.update(
+                mapOf(
+                    "paidBy" to updatedPaidBy,
+                    "status" to newStatus
+                )
+            ).await()
+            
             Result.success(Unit)
         } catch (e: Exception) {
+            Log.e("AssetRepo", "Mark paid error: ${e.message}")
             Result.failure(Exception("Failed to mark paid: ${e.message}"))
         }
     }
@@ -105,15 +136,19 @@ class AssetRepository {
             set(Calendar.HOUR_OF_DAY, 9); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0)
             if (before(Calendar.getInstance())) add(Calendar.MONTH, 1)
         }
+        val billRef = billsCol(houseId).document()
         val bill = Bill(
-            assetId = asset.id, houseId = houseId,
-            assetName = asset.name, category = asset.category,
+            id = billRef.id,
+            assetId = asset.id, 
+            houseId = houseId,
+            assetName = asset.name, 
+            category = asset.category,
             amount = asset.monthlyAmount,
             dueDate = Timestamp(cal.time),
             paidBy = asset.splitAmong.associateWith { false },
-            status = "PENDING", createdAt = Timestamp.now()
+            status = "PENDING", 
+            createdAt = Timestamp.now()
         )
-        val ref = billsCol(houseId).add(bill).await()
-        billsCol(houseId).document(ref.id).update("id", ref.id).await()
+        billRef.set(bill).await()
     }
 }

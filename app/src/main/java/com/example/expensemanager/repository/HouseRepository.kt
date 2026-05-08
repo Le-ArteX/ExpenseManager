@@ -1,5 +1,6 @@
 package com.example.expensemanager.repository
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -30,7 +31,6 @@ class HouseRepository {
                 createdAt = Timestamp.now()
             )
 
-            // Atomic batch write to create house and link member
             db.runBatch { batch ->
                 batch.set(houseRef, house)
                 batch.update(db.collection("members").document(uid), "houseId", houseRef.id)
@@ -82,7 +82,13 @@ class HouseRepository {
             return@callbackFlow
         }
         val reg = db.collection("houses").document(houseId)
-            .addSnapshotListener { snap, _ -> trySend(snap?.toObject(House::class.java)) }
+            .addSnapshotListener { snap, err -> 
+                if (err != null) {
+                    Log.e("HouseRepo", "Listen house error: ${err.message}")
+                    return@addSnapshotListener
+                }
+                trySend(snap?.toObject(House::class.java)) 
+            }
         awaitClose { reg.remove() }
     }
 
@@ -91,8 +97,13 @@ class HouseRepository {
             trySend(emptyList())
             return@callbackFlow
         }
+        // Top-level collection query is generally safe without manual index for single field
         val reg = db.collection("members").whereEqualTo("houseId", houseId)
-            .addSnapshotListener { snap, _ ->
+            .addSnapshotListener { snap, err ->
+                if (err != null) {
+                    Log.e("HouseRepo", "Listen members error: ${err.message}")
+                    return@addSnapshotListener
+                }
                 trySend(snap?.toObjects(Member::class.java) ?: emptyList())
             }
         awaitClose { reg.remove() }
