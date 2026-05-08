@@ -47,6 +47,11 @@ class VaultFragment : Fragment() {
         binding.fabAddVaultItem.setOnClickListener {
             findNavController().navigate(R.id.action_vault_to_addVaultItem)
         }
+
+        binding.cardSnapReceipt.setOnClickListener {
+            val action = VaultFragmentDirections.actionVaultToCamera(prefs.houseId ?: "", "")
+            findNavController().navigate(action)
+        }
     }
 
     private fun setupToolbar() {
@@ -93,6 +98,8 @@ class VaultFragment : Fragment() {
                         vaultAdapter.submitList(items)
                         binding.emptyVaultState.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
                         binding.rvVaultItems.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+                        
+                        binding.tvTotalCount.text = "${items.size} total"
                         
                         val expiringCount = items.count { it.isExpiringSoon() }
                         binding.tvToolbarSubtitle.text = if (expiringCount > 0) {

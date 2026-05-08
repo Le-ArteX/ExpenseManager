@@ -65,31 +65,100 @@
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvVaultItems"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
-        android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
-
-    <LinearLayout android:id="@+id/emptyVaultState"
-        android:layout_width="match_parent" android:layout_height="match_parent"
-        android:orientation="vertical" android:gravity="center"
-        android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="■" android:textSize="48sp" android:textColor="@color/gray_border"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Warranty Vault is empty"
-            android:textSize="16sp" android:textStyle="bold"
-            android:textColor="@color/text_secondary" android:layout_marginTop="12dp"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Add shared electronics and snap receipts"
-            android:textSize="12sp" android:textColor="@color/text_secondary"
-            android:layout_marginTop="4dp"/>
-    </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SHARED ITEMS"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:letterSpacing="0.05"/>
+                <TextView
+                    android:id="@+id/tvTotalCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="0 total"
+                    android:textSize="12sp"
+                    android:textColor="@color/teal_primary"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="4dp"/>
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvVaultItems"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+            <LinearLayout android:id="@+id/emptyVaultState"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:gravity="center"
+                android:visibility="gone"
+                android:paddingVertical="40dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="■" android:textSize="48sp" android:textColor="@color/gray_border"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Warranty Vault is empty"
+                    android:textSize="16sp" android:textStyle="bold"
+                    android:textColor="@color/text_secondary" android:layout_marginTop="12dp"/>
+            </LinearLayout>
+
+            <!-- Snap a Receipt Card -->
+            <LinearLayout
+                android:id="@+id/cardSnapReceipt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_snap_receipt"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_camera"
+                    app:tint="@color/text_secondary"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Snap a Receipt"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/teal_dark"
+                    android:layout_marginTop="12dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Use CameraX to capture &amp; store in Firebase Storage"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    android:gravity="center"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabAddVaultItem"

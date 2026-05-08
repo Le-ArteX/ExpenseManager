@@ -27,7 +27,7 @@ class AuthRepository {
     private val brevoApi = retrofit.create(BrevoApiService::class.java)
 
     // Using the API key directly as the BuildConfig generation was not working correctly.
-    private val BREVO_API_KEY = "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"
+    private val BREVO_API_KEY = "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"
     
     private val SENDER_EMAIL  = "mursalinleon2295@gmail.com"
 
