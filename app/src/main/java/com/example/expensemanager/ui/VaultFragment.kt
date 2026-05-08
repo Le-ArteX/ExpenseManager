@@ -106,7 +106,7 @@ class VaultFragment : Fragment() {
                     viewModel.members.collect { members ->
                         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
                         val currentMember = members.find { it.uid == currentUserUid }
-                        binding.tvProfileInitials.text = currentMember?.name?.take(1)?.uppercase() ?: "U"
+                        binding.tvProfileInitials.text = currentMember?.displayName?.take(1)?.uppercase() ?: "U"
                     }
                 }
             }

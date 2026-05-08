@@ -13,7 +13,10 @@ data class WarrantyItem(
     val notes: String = "",
     val addedBy: String = ""
 ) {
-    var expiringSoon: Boolean = TODO("initialize me")
+    fun isExpiringSoon(): Boolean {
+        val days = daysUntilExpiry()
+        return days in 0..30
+    }
 
     fun warrantyStatus(): String {
         val expiry = warrantyExpiryDate?.toDate() ?: return "EXPIRED"

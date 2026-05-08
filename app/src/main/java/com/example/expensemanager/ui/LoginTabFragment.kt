@@ -2,11 +2,10 @@ package com.example.expensemanager.ui
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -15,19 +14,20 @@ import androidx.navigation.fragment.findNavController
 import com.example.expensemanager.R
 import com.example.expensemanager.databinding.FragmentLoginTabBinding
 import com.example.expensemanager.repository.AuthRepository
+import com.example.expensemanager.repository.HouseRepository
 import com.example.expensemanager.util.PrefsManager
 import com.example.expensemanager.util.ValidationUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 class LoginTabFragment : Fragment() {
     private var _binding: FragmentLoginTabBinding? = null
     private val binding get() = _binding!!
     private val authRepo = AuthRepository()
+    private val houseRepo = HouseRepository()
     private lateinit var googleSignInClient: GoogleSignInClient
 
     private val googleSignInLauncher = registerForActivityResult(
@@ -44,6 +44,7 @@ class LoginTabFragment : Fragment() {
                     Toast.makeText(requireContext(), "Google Sign-In failed: No ID Token", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: ApiException) {
+                Log.e("LoginTab", "Google Sign-In failed (Status: ${e.statusCode}): ${e.message}")
                 Toast.makeText(requireContext(), "Google Sign-In failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
@@ -62,7 +63,8 @@ class LoginTabFragment : Fragment() {
         setupGoogleSignIn()
 
         binding.tvForgotPassword.setOnClickListener {
-            showForgotPasswordDialog()
+            // Navigate to ForgotPasswordFragment to start OTP flow
+            findNavController().navigate(R.id.action_auth_to_forgotPassword)
         }
 
         binding.btnLogin.setOnClickListener {
@@ -84,11 +86,11 @@ class LoginTabFragment : Fragment() {
             setLoading(true)
             viewLifecycleOwner.lifecycleScope.launch {
                 val result = authRepo.loginWithEmail(email, pass)
-                setLoading(false)
-                result.onSuccess {
+                if (result.isSuccess) {
                     handleLoginSuccess()
-                }.onFailure {
-                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                } else {
+                    setLoading(false)
+                    Toast.makeText(requireContext(), result.exceptionOrNull()?.message, Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -111,49 +113,40 @@ class LoginTabFragment : Fragment() {
         setLoading(true)
         viewLifecycleOwner.lifecycleScope.launch {
             val result = authRepo.loginWithGoogle(idToken)
-            setLoading(false)
-            result.onSuccess {
+            if (result.isSuccess) {
                 handleLoginSuccess()
-            }.onFailure {
-                Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+            } else {
+                setLoading(false)
+                Toast.makeText(requireContext(), result.exceptionOrNull()?.message, Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun handleLoginSuccess() {
+        val user = authRepo.getCurrentUser() ?: return
         val prefs = PrefsManager(requireContext())
-        if (prefs.isHouseSetup()) {
-            findNavController().navigate(R.id.action_auth_to_dashboard)
-        } else {
-            findNavController().navigate(R.id.action_auth_to_houseSetup)
-        }
-    }
-
-    private fun showForgotPasswordDialog() {
-        val editText = EditText(requireContext()).apply {
-            hint = "Enter your registered email"
-            setPadding(60, 40, 60, 40)
-        }
-        val container = FrameLayout(requireContext())
-        container.addView(editText)
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Reset Password")
-            .setMessage("We will send a reset link to your email.")
-            .setView(container)
-            .setPositiveButton("Send") { _, _ ->
-                val email = editText.text.toString().trim()
-                if (ValidationUtils.isValidEmail(email)) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        authRepo.sendPasswordReset(email)
-                        Toast.makeText(requireContext(), "Reset email sent!", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Invalid email", Toast.LENGTH_SHORT).show()
-                }
+        
+        setLoading(true)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val profile = authRepo.getMemberProfile(user.uid)
+            
+            if (profile != null && profile.houseId.isNotEmpty()) {
+                // User has an existing house, fetch its details
+                val house = houseRepo.getHouse(profile.houseId)
+                setLoading(false)
+                
+                prefs.houseId = profile.houseId
+                prefs.userId = user.uid
+                house?.let { prefs.houseName = it.name }
+                
+                findNavController().navigate(R.id.action_auth_to_dashboard)
+            } else {
+                // No house found, take to setup
+                setLoading(false)
+                prefs.userId = user.uid
+                findNavController().navigate(R.id.action_auth_to_houseSetup)
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
     }
 
     private fun setLoading(isLoading: Boolean) {

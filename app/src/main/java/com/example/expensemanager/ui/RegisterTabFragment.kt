@@ -59,15 +59,26 @@ class RegisterTabFragment : Fragment() {
             }
             binding.confirmPasswordLayout.error = null
 
-            setLoading(true)
-            viewLifecycleOwner.lifecycleScope.launch {
-                val result = authRepo.registerWithEmail(email, pass, name)
-                setLoading(false)
-                result.onSuccess {
-                    findNavController().navigate(R.id.action_auth_to_houseSetup)
-                }.onFailure {
-                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
-                }
+            sendOtpAndNavigate(email, name, pass)
+        }
+    }
+
+    private fun sendOtpAndNavigate(email: String, name: String, pass: String) {
+        setLoading(true)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = authRepo.sendOtp(email)
+            setLoading(false)
+            result.onSuccess {
+                Toast.makeText(requireContext(), "OTP sent to your email", Toast.LENGTH_SHORT).show()
+                val action = AuthFragmentDirections.actionAuthToOtp(
+                    email = email,
+                    type = "REGISTER",
+                    name = name,
+                    password = pass
+                )
+                findNavController().navigate(action)
+            }.onFailure {
+                Toast.makeText(requireContext(), it.message ?: "Failed to send OTP", Toast.LENGTH_LONG).show()
             }
         }
     }

@@ -32,6 +32,15 @@ class SplashFragment : Fragment() {
             val prefs = PrefsManager(requireContext())
             
             if (user != null) {
+                // If logged in but local houseId is missing, try to sync from Firestore
+                if (!prefs.isHouseSetup()) {
+                    val profile = authRepo.getMemberProfile(user.uid)
+                    if (profile != null) {
+                        prefs.houseId = profile.houseId
+                        prefs.userId = user.uid
+                    }
+                }
+
                 if (prefs.isHouseSetup()) {
                     findNavController().navigate(R.id.action_splash_to_dashboard)
                 } else {
