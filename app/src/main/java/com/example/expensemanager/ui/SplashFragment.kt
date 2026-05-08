@@ -13,24 +13,28 @@ import com.example.expensemanager.repository.AuthRepository
 import com.example.expensemanager.util.PrefsManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 class SplashFragment : Fragment() {
     private var _binding: FragmentSplashBinding? = null
     private val binding get() = _binding!!
     private val authRepo = AuthRepository()
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?, savedInstanceState: Bundle?): View {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSplashBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lifecycleScope.launch {
-            delay(1800)  // Show splash for 1.8 seconds
-            if (authRepo.isLoggedIn()) {
+            delay(1500)
+            val user = authRepo.getCurrentUser()
+            if (user != null) {
                 val prefs = PrefsManager(requireContext())
                 if (prefs.isHouseSetup()) {
                     findNavController().navigate(R.id.action_splash_to_dashboard)
                 } else {
+                    // Redirect to Auth then Setup, or directly to Setup if graph allows
                     findNavController().navigate(R.id.action_splash_to_auth)
                 }
             } else {
@@ -38,5 +42,9 @@ class SplashFragment : Fragment() {
             }
         }
     }
-    override fun onDestroyView() { super.onDestroyView(); _binding = null }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

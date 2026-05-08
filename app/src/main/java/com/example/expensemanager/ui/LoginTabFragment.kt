@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.expensemanager.R
 import com.example.expensemanager.databinding.FragmentLoginTabBinding
 import com.example.expensemanager.repository.AuthRepository
+import com.example.expensemanager.util.PrefsManager
 import com.example.expensemanager.util.ValidationUtils
 import kotlinx.coroutines.launch
 
@@ -54,7 +55,12 @@ class LoginTabFragment : Fragment() {
                 val result = authRepo.loginWithEmail(email, pass)
                 setLoading(false)
                 result.onSuccess {
-                    findNavController().navigate(R.id.action_auth_to_dashboard)
+                    val prefs = PrefsManager(requireContext())
+                    if (prefs.isHouseSetup()) {
+                        findNavController().navigate(R.id.action_auth_to_dashboard)
+                    } else {
+                        findNavController().navigate(R.id.action_auth_to_houseSetup)
+                    }
                 }.onFailure {
                     Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
                 }
