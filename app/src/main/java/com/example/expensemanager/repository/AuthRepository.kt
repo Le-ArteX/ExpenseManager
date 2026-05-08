@@ -26,16 +26,21 @@ class AuthRepository {
 
     private val brevoApi = retrofit.create(BrevoApiService::class.java)
 
-    // Using the new key you provided
+    // Using the API key directly as the BuildConfig generation was not working correctly.
     private val BREVO_API_KEY = "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"
     
-    // Verified sender email
     private val SENDER_EMAIL  = "mursalinleon2295@gmail.com"
 
     fun getCurrentUser(): FirebaseUser? = auth.currentUser
 
     suspend fun sendOtp(email: String): Result<Unit> {
         return try {
+            Log.d("OTP_FLOW", "Using hardcoded API Key. Length: ${BREVO_API_KEY.length}")
+            
+            if (BREVO_API_KEY.isEmpty()) {
+                return Result.failure(Exception("API Key missing."))
+            }
+
             val otp = (100000..999999).random().toString()
             
             val data = mapOf(
@@ -66,24 +71,16 @@ class AuthRepository {
             val response = brevoApi.sendEmail(BREVO_API_KEY, emailRequest)
             
             if (response.isSuccessful) {
-                Log.d("OTP_FLOW", "Brevo Success: ${response.body()?.messageId}")
+                Log.d("OTP_FLOW", "Brevo Success")
                 Result.success(Unit)
             } else {
                 val errorJson = response.errorBody()?.string() ?: "{}"
-                Log.e("OTP_FLOW", "Brevo Failed with ${response.code()}: $errorJson")
-                
-                // Try to extract the specific error message from Brevo
-                val brevoMessage = try {
-                    JSONObject(errorJson).getString("message")
-                } catch (e: Exception) {
-                    errorJson
-                }
-                
-                val userFriendlyError = "Brevo Error (${response.code()}): $brevoMessage"
-                Result.failure(Exception(userFriendlyError))
+                Log.e("OTP_FLOW", "Brevo Failed (${response.code()}): $errorJson")
+                val msg = try { JSONObject(errorJson).getString("message") } catch (e: Exception) { errorJson }
+                Result.failure(Exception("Brevo Error (${response.code()}): $msg"))
             }
         } catch (e: Exception) {
-            Log.e("OTP_FLOW", "System Error: ${e.message}")
+            Log.e("OTP_FLOW", "Error: ${e.message}")
             Result.failure(e)
         }
     }

@@ -22,20 +22,20 @@ class MainActivity : AppCompatActivity() {
         navController = navHost.navController
 
         // Connect bottom nav to navigation controller
-        // The IDs in bottom_nav_menu.xml match the fragment IDs in nav_graph.xml
         binding.bottomNav.setupWithNavController(navController)
 
-        // Hide bottom nav on specific screens (auth, setup, and detailed forms)
+        // Control bottom nav visibility
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val hideOnScreens = setOf(
                 R.id.splashFragment,
-                R.id.authFragment,
-                R.id.forgotPasswordFragment,
+                R.id.authFragment, // Hide only on the main Login/Register screen
                 R.id.houseSetupFragment,
                 R.id.cameraFragment,
                 R.id.addAssetFragment,
                 R.id.addVaultItemFragment
             )
+            
+            // Bottom nav will now be VISIBLE on otpFragment, forgotPasswordFragment, and resetPasswordFragment
             binding.bottomNav.visibility =
                 if (destination.id in hideOnScreens) View.GONE else View.VISIBLE
         }

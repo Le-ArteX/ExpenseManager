@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.services)
     alias(libs.plugins.androidx.navigation.safeargs)
+}
+
+// Load local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
 }
 
 android {
@@ -15,6 +24,10 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Pass the key to BuildConfig
+        val brevoKey = localProperties.getProperty("BREVO_API_KEY") ?: ""
+        buildConfigField("String", "BREVO_API_KEY", "\"$brevoKey\"")
     }
 
     buildTypes {
@@ -32,9 +45,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // Fix for "Android 16 KB Alignment" warning/error on API 35+
-    // Setting useLegacyPackaging to true compresses JNI libraries, 
-    // which works around alignment issues in prebuilt libraries.
     packaging {
         jniLibs {
             useLegacyPackaging = true
@@ -43,6 +53,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -80,7 +91,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
 
-    // Retrofit for API calls
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
 
