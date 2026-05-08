@@ -1,5 +1,6 @@
 package com.example.expensemanager.repository
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -9,11 +10,14 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.example.expensemanager.model.Member
 import kotlinx.coroutines.tasks.await
+
 class AuthRepository {
     private val auth = Firebase.auth
     private val db   = Firebase.firestore
+
     fun getCurrentUser(): FirebaseUser? = auth.currentUser
     fun isLoggedIn(): Boolean = auth.currentUser != null
+
     suspend fun registerWithEmail(
         email: String, password: String, displayName: String
     ): Result<FirebaseUser> {
@@ -26,17 +30,21 @@ class AuthRepository {
             saveMemberProfile(user, displayName)
             Result.success(user)
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Registration Error: ${e.message}", e)
             Result.failure(Exception(friendlyAuthError(e.message)))
         }
     }
+
     suspend fun loginWithEmail(email: String, password: String): Result<FirebaseUser> {
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
             Result.success(result.user ?: throw Exception("Login failed"))
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Login Error: ${e.message}", e)
             Result.failure(Exception(friendlyAuthError(e.message)))
         }
     }
+
     suspend fun loginWithGoogle(idToken: String): Result<FirebaseUser> {
         return try {
             val cred = GoogleAuthProvider.getCredential(idToken, null)
@@ -47,9 +55,11 @@ class AuthRepository {
             }
             Result.success(user)
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Google Login Error: ${e.message}", e)
             Result.failure(Exception("Google sign-in failed: ${e.message}"))
         }
     }
+
     suspend fun sendPasswordReset(email: String): Result<Unit> {
         return try {
             auth.sendPasswordResetEmail(email).await()
@@ -58,11 +68,14 @@ class AuthRepository {
             Result.failure(Exception("Could not send reset email"))
         }
     }
+
     fun logout() = auth.signOut()
+
     suspend fun updateFcmToken(token: String) {
         val uid = auth.currentUser?.uid ?: return
         db.collection("members").document(uid).update("fcmToken", token).await()
     }
+
     private suspend fun saveMemberProfile(user: FirebaseUser, displayName: String) {
         val member = Member(
             uid = user.uid, displayName = displayName,
@@ -71,6 +84,7 @@ class AuthRepository {
         )
         db.collection("members").document(user.uid).set(member).await()
     }
+
     private fun friendlyAuthError(msg: String?): String = when {
         msg?.contains("email address is already") == true ->
             "This email is already registered. Please login."

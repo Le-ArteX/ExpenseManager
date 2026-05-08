@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
     alias(libs.plugins.androidx.navigation.safeargs)
 }
@@ -33,9 +32,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+    // kotlinOptions is deprecated/removed in AGP 9.0 built-in Kotlin.
+    // It defaults to the Java version set in compileOptions above.
 
     buildFeatures {
         viewBinding = true
