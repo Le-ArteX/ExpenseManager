@@ -10,6 +10,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.example.expensemanager.model.Member
 import kotlinx.coroutines.tasks.await
+import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
@@ -18,7 +19,6 @@ class AuthRepository {
     private val auth = Firebase.auth
     private val db   = Firebase.firestore
 
-    // Retrofit setup for Brevo
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.brevo.com/")
         .addConverterFactory(GsonConverterFactory.create())
@@ -26,20 +26,18 @@ class AuthRepository {
 
     private val brevoApi = retrofit.create(BrevoApiService::class.java)
 
-    // Using the long key from your screenshot
-    private val BREVO_API_KEY = "xsmtpsib-3fb12ce833b0d3692550a8f86aee7ae75bce5cb22878401347072a2977759c25"
+    // Using the new key you provided
+    private val BREVO_API_KEY = "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"
     
-    // Updated with your verified email
+    // Verified sender email
     private val SENDER_EMAIL  = "mursalinleon2295@gmail.com"
 
     fun getCurrentUser(): FirebaseUser? = auth.currentUser
-    fun isLoggedIn(): Boolean = auth.currentUser != null
 
     suspend fun sendOtp(email: String): Result<Unit> {
         return try {
             val otp = (100000..999999).random().toString()
             
-            // 1. Store OTP in Firestore
             val data = mapOf(
                 "otp" to otp,
                 "createdAt" to Timestamp.now(),
@@ -47,7 +45,6 @@ class AuthRepository {
             )
             db.collection("otps").document(email).set(data).await()
             
-            // 2. Send Real Email via Brevo
             val emailRequest = BrevoEmailRequest(
                 sender = BrevoSender("Expense Manager", SENDER_EMAIL),
                 to = listOf(BrevoTo(email)),
@@ -66,12 +63,27 @@ class AuthRepository {
                 """.trimIndent()
             )
 
-            brevoApi.sendEmail(BREVO_API_KEY, emailRequest)
+            val response = brevoApi.sendEmail(BREVO_API_KEY, emailRequest)
             
-            Log.d("OTP_FLOW", "Real Email sent to $email")
-            Result.success(Unit)
+            if (response.isSuccessful) {
+                Log.d("OTP_FLOW", "Brevo Success: ${response.body()?.messageId}")
+                Result.success(Unit)
+            } else {
+                val errorJson = response.errorBody()?.string() ?: "{}"
+                Log.e("OTP_FLOW", "Brevo Failed with ${response.code()}: $errorJson")
+                
+                // Try to extract the specific error message from Brevo
+                val brevoMessage = try {
+                    JSONObject(errorJson).getString("message")
+                } catch (e: Exception) {
+                    errorJson
+                }
+                
+                val userFriendlyError = "Brevo Error (${response.code()}): $brevoMessage"
+                Result.failure(Exception(userFriendlyError))
+            }
         } catch (e: Exception) {
-            Log.e("OTP_FLOW", "Error sending email: ${e.message}")
+            Log.e("OTP_FLOW", "System Error: ${e.message}")
             Result.failure(e)
         }
     }
@@ -151,8 +163,8 @@ class AuthRepository {
             
             Result.success(user)
         } catch (e: Exception) {
-            Log.e("AuthRepository", "Google Login Error: ${e.message}", e)
-            Result.failure(Exception("Google sign-in failed: ${e.message}"))
+            Log.e("AuthRepository", "Google Login Error: ${e.message}")
+            Result.failure(Exception("Google sign-in failed"))
         }
     }
 
