@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/dashboardFragment"
-        android:icon="@drawable/ic_launcher_foreground"
-        android:title="Home"/>
-    <item android:id="@+id/vaultFragment"
-        android:icon="@drawable/ic_launcher_foreground"
-        android:title="Vault"/>
-    <item android:id="@+id/membersFragment"
-        android:icon="@drawable/ic_launcher_foreground"
-        android:title="Members"/>
+    <item
+        android:id="@+id/dashboardFragment"
+        android:icon="@drawable/ic_notification"
+        android:title="Bills" />
+    <item
+        android:id="@+id/vaultFragment"
+        android:icon="@drawable/ic_add"
+        android:title="Vault" />
+    <item
+        android:id="@+id/membersFragment"
+        android:icon="@drawable/ic_person"
+        android:title="Members" />
 </menu>
