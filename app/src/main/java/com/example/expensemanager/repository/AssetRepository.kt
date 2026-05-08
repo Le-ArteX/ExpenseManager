@@ -12,13 +12,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.util.*
+
 class AssetRepository {
     private val db  = Firebase.firestore
-    private val uid get() = Firebase.auth.currentUser!!.uid
+    private val uid get() = Firebase.auth.currentUser?.uid ?: ""
+
     private fun assetsCol(houseId: String) =
         db.collection("houses").document(houseId).collection("assets")
     private fun billsCol(houseId: String) =
         db.collection("houses").document(houseId).collection("bills")
+
     //  CREATE
     suspend fun addAsset(houseId: String, asset: SharedAsset): Result<SharedAsset> {
         return try {
@@ -31,6 +34,7 @@ class AssetRepository {
             Result.failure(Exception("Failed to add asset: ${e.message}"))
         }
     }
+
     //  READ
     fun getAssets(houseId: String): Flow<List<SharedAsset>> = callbackFlow {
         val reg = assetsCol(houseId).whereEqualTo("isActive", true)
@@ -40,16 +44,21 @@ class AssetRepository {
             }
         awaitClose { reg.remove() }
     }
+
+    // Simplified query to avoid "Index Required" crash
     fun getPendingBills(houseId: String): Flow<List<Bill>> = callbackFlow {
         val reg = billsCol(houseId)
-            .whereIn("status", listOf("PENDING","PARTIAL","OVERDUE"))
             .orderBy("dueDate", Query.Direction.ASCENDING)
             .addSnapshotListener { snap, err ->
                 if (err != null) { close(err); return@addSnapshotListener }
-                trySend(snap?.toObjects(Bill::class.java) ?: emptyList())
+                val bills = snap?.toObjects(Bill::class.java) ?: emptyList()
+                // Filter status on client-side to avoid index requirement
+                val pending = bills.filter { it.status in listOf("PENDING", "PARTIAL", "OVERDUE") }
+                trySend(pending)
             }
         awaitClose { reg.remove() }
     }
+
     fun getAllBills(houseId: String): Flow<List<Bill>> = callbackFlow {
         val reg = billsCol(houseId)
             .orderBy("dueDate", Query.Direction.DESCENDING)
@@ -59,6 +68,7 @@ class AssetRepository {
             }
         awaitClose { reg.remove() }
     }
+
     //  UPDATE
     suspend fun markMemberPaid(houseId: String, billId: String, memberId: String): Result<Unit> {
         return try {
@@ -79,6 +89,7 @@ class AssetRepository {
             Result.failure(Exception("Failed to mark paid: ${e.message}"))
         }
     }
+
     suspend fun deactivateAsset(houseId: String, assetId: String): Result<Unit> {
         return try {
             assetsCol(houseId).document(assetId).update("isActive", false).await()
@@ -87,7 +98,7 @@ class AssetRepository {
             Result.failure(Exception("Failed to remove: ${e.message}"))
         }
     }
-    //  HELPER: auto-create bill cycle
+
     private suspend fun createBillCycle(houseId: String, asset: SharedAsset) {
         val cal = Calendar.getInstance().apply {
             set(Calendar.DAY_OF_MONTH, asset.dueDay.coerceIn(1, 28))
