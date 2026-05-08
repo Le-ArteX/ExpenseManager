@@ -8,16 +8,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.example.expensemanager.R
 import com.example.expensemanager.adapter.MemberAdapter
 import com.example.expensemanager.databinding.FragmentMembersBinding
 import com.example.expensemanager.util.PrefsManager
 import com.example.expensemanager.viewmodel.AssetViewModel
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class MembersFragment : Fragment() {
@@ -55,17 +58,41 @@ class MembersFragment : Fragment() {
     }
 
     private fun setupToolbar() {
-        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.tvToolbarSubtitle.text = prefs.houseName
+        binding.profileContainer.setOnClickListener { view ->
+            showProfileMenu(view)
+        }
+    }
+
+    private fun showProfileMenu(view: View) {
+        val popup = PopupMenu(requireContext(), view)
+        popup.menuInflater.inflate(R.menu.dashboard_menu, popup.menu)
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_logout -> {
+                    logout()
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun logout() {
+        FirebaseAuth.getInstance().signOut()
+        prefs.clear()
+        findNavController().navigate(R.id.authFragment)
     }
 
     private fun setupRecyclerView() {
-        // We'll pass the house's admin ID to the adapter to show the badge
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.house.collect { house ->
                     memberAdapter = MemberAdapter(adminId = house?.adminId)
                     binding.rvMembers.adapter = memberAdapter
                     binding.tvInviteCode.text = house?.inviteCode ?: "......"
+                    binding.tvToolbarSubtitle.text = house?.name ?: prefs.houseName
                 }
             }
         }
@@ -78,6 +105,11 @@ class MembersFragment : Fragment() {
                     if (::memberAdapter.isInitialized) {
                         memberAdapter.submitList(memberList)
                     }
+                    binding.tvMemberCount.text = "${memberList.size} members"
+                    
+                    val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                    val currentMember = memberList.find { it.uid == currentUserUid }
+                    binding.tvProfileInitials.text = currentMember?.name?.take(1)?.uppercase() ?: "U"
                 }
             }
         }

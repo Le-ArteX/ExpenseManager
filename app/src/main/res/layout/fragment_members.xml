@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,13 +10,59 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:elevation="0dp">
-        <com.google.android.material.appbar.MaterialToolbar
+
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="wrap_content"
             android:background="@color/teal_dark"
-            app:title="House Members"
-            app:titleTextColor="@color/white" />
+            app:contentInsetStart="0dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:paddingHorizontal="16dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_centerVertical="true">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Members"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/tvToolbarSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="House Name"
+                        android:textColor="#B2DFDB"
+                        android:textSize="12sp"/>
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/profileContainer"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/bg_circle_teal">
+                    <TextView
+                        android:id="@+id/tvProfileInitials"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="U"
+                        android:textColor="@color/teal_primary"
+                        android:layout_gravity="center"
+                        android:textStyle="bold"
+                        android:textSize="14sp"/>
+                </FrameLayout>
+            </RelativeLayout>
+        </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -29,58 +76,88 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- INVITE CODE CARD -->
+            <!-- DARK INVITE CODE CARD -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#0D2B28"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:strokeWidth="0dp">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
                     android:padding="20dp">
 
                     <TextView
+                        android:id="@+id/lblInvite"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Share Invite Code"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:text="INVITE CODE"
+                        android:textColor="#4DB6AC"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1"/>
 
                     <TextView
                         android:id="@+id/tvInviteCode"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_below="@id/lblInvite"
                         android:layout_marginTop="8dp"
-                        android:letterSpacing="0.2"
-                        android:text="000000"
-                        android:textColor="@color/teal_dark"
-                        android:textSize="32sp"
-                        android:textStyle="bold" />
+                        android:text="8B4K2F"
+                        android:textColor="@color/white"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.15"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tvInviteCode"
+                        android:layout_marginTop="4dp"
+                        android:text="Share to invite a new member"
+                        android:textColor="#80CBC4"
+                        android:textSize="11sp"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCopyCode"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Copy Code"
-                        app:icon="@drawable/ic_launcher_foreground" />
-                </LinearLayout>
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:text="Copy"
+                        android:textAllCaps="false"
+                        app:backgroundTint="#1B4D48"
+                        android:textColor="@color/white"
+                        app:cornerRadius="8dp"/>
+                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="Current Members"
-                android:textColor="@color/text_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="FLATMATES"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"/>
+                <TextView
+                    android:id="@+id/tvMemberCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="0 members"
+                    android:textColor="@color/teal_mid"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:layout_centerVertical="true"/>
+            </RelativeLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvMembers"

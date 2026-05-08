@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -19,6 +20,9 @@ import com.example.expensemanager.viewmodel.AssetViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
@@ -41,8 +45,8 @@ class DashboardFragment : Fragment() {
         
         val currentHouseId = prefs.houseId
         if (currentHouseId.isEmpty()) {
-            // If we somehow reached here without a house, go to setup
-            findNavController().navigate(R.id.action_auth_to_houseSetup)
+            // Fix: Use the correct action ID for Dashboard destination
+            findNavController().navigate(R.id.action_dashboard_to_houseSetup)
             return
         }
 
@@ -59,7 +63,32 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupToolbar() {
-        binding.toolbar.title = prefs.houseName
+        binding.tvToolbarTitle.text = prefs.houseName
+        
+        binding.profileContainer.setOnClickListener { view ->
+            showProfileMenu(view)
+        }
+    }
+
+    private fun showProfileMenu(view: View) {
+        val popup = PopupMenu(requireContext(), view)
+        popup.menuInflater.inflate(R.menu.dashboard_menu, popup.menu)
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_logout -> {
+                    logout()
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun logout() {
+        FirebaseAuth.getInstance().signOut()
+        prefs.clear()
+        findNavController().navigate(R.id.authFragment)
     }
 
     private fun setupRecyclerView() {
@@ -92,6 +121,27 @@ class DashboardFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
+                    viewModel.house.collect { house ->
+                        house?.let {
+                            binding.tvToolbarTitle.text = it.name
+                            prefs.houseName = it.name
+                        }
+                    }
+                }
+                launch {
+                    viewModel.members.collect { members ->
+                        val count = members.size
+                        val date = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
+                        binding.tvToolbarSubtitle.text = "$count members • $date"
+                        
+                        // Set initials of current user
+                        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                        val currentMember = members.find { it.uid == currentUserUid }
+                        // Fix: Member uses displayName, not name
+                        binding.tvProfileInitials.text = currentMember?.displayName?.take(1)?.uppercase() ?: "U"
+                    }
+                }
+                launch {
                     viewModel.filteredBills.collect { bills ->
                         billAdapter.submitList(bills)
                         binding.emptyState.visibility =
@@ -102,17 +152,17 @@ class DashboardFragment : Fragment() {
                 }
                 launch {
                     viewModel.totalMonthly.collect { total ->
-                        binding.tvTotalMonthly.text = String.format(" %.0f", total)
+                        binding.tvTotalMonthly.text = String.format("৳ %.0f", total)
                     }
                 }
                 launch {
                     viewModel.myTotalDue.collect { due ->
-                        binding.tvDueAmount.text = String.format(" %.0f", due)
+                        binding.tvDueAmount.text = String.format("৳ %.0f", due)
                     }
                 }
                 launch {
                     viewModel.myTotalPaid.collect { paid ->
-                        binding.tvPaidAmount.text = String.format(" %.0f", paid)
+                        binding.tvPaidAmount.text = String.format("৳ %.0f", paid)
                     }
                 }
                 launch {

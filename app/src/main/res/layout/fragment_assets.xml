@@ -31,7 +31,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Warranty Vault"
+                        android:text="Shared Assets"
                         android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold"/>
@@ -39,7 +39,7 @@
                         android:id="@+id/tvToolbarSubtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0 items"
+                        android:text="0 active subscriptions"
                         android:textColor="#B2DFDB"
                         android:textSize="12sp"/>
                 </LinearLayout>
@@ -66,7 +66,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvVaultItems"
+        android:id="@+id/rvAssets"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp"
@@ -74,28 +74,26 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-    <LinearLayout android:id="@+id/emptyVaultState"
+    <LinearLayout android:id="@+id/emptyAssetsState"
         android:layout_width="match_parent" android:layout_height="match_parent"
         android:orientation="vertical" android:gravity="center"
         android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="■" android:textSize="48sp" android:textColor="@color/gray_border"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Warranty Vault is empty"
+            android:text="No assets found"
             android:textSize="16sp" android:textStyle="bold"
-            android:textColor="@color/text_secondary" android:layout_marginTop="12dp"/>
+            android:textColor="@color/text_secondary"/>
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Add shared electronics and snap receipts"
+            android:text="Add bills like Netflix or Electricity"
             android:textSize="12sp" android:textColor="@color/text_secondary"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fabAddVaultItem"
+        android:id="@+id/fabAddAsset"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:layout_gravity="bottom|end" android:layout_margin="20dp"
-        android:text="Add Item"
+        android:text="Add Asset"
         app:icon="@drawable/ic_add"
         app:backgroundTint="@color/teal_dark"
         android:textColor="@color/white"/>

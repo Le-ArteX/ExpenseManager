@@ -12,18 +12,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.expensemanager.R
-import com.example.expensemanager.adapter.VaultAdapter
-import com.example.expensemanager.databinding.FragmentVaultBinding
+import com.example.expensemanager.adapter.AssetAdapter
+import com.example.expensemanager.databinding.FragmentAssetsBinding
 import com.example.expensemanager.util.PrefsManager
 import com.example.expensemanager.viewmodel.AssetViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
-class VaultFragment : Fragment() {
-    private var _binding: FragmentVaultBinding? = null
+class AssetsFragment : Fragment() {
+    private var _binding: FragmentAssetsBinding? = null
     private val binding get() = _binding!!
     private val viewModel: AssetViewModel by viewModels()
-    private lateinit var vaultAdapter: VaultAdapter
+    private lateinit var assetAdapter: AssetAdapter
     private lateinit var prefs: PrefsManager
 
     override fun onCreateView(
@@ -31,7 +31,7 @@ class VaultFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentVaultBinding.inflate(inflater, container, false)
+        _binding = FragmentAssetsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -44,8 +44,8 @@ class VaultFragment : Fragment() {
         setupRecyclerView()
         observeData()
 
-        binding.fabAddVaultItem.setOnClickListener {
-            findNavController().navigate(R.id.action_vault_to_addVaultItem)
+        binding.fabAddAsset.setOnClickListener {
+            findNavController().navigate(R.id.action_assets_to_addAsset)
         }
     }
 
@@ -77,29 +77,23 @@ class VaultFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        vaultAdapter = VaultAdapter(
-            onItemClick = { item ->
-                // Handle item click
+        assetAdapter = AssetAdapter(
+            onItemClick = { asset ->
+                // Handle asset click
             }
         )
-        binding.rvVaultItems.adapter = vaultAdapter
+        binding.rvAssets.adapter = assetAdapter
     }
 
     private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.warrantyItems.collect { items ->
-                        vaultAdapter.submitList(items)
-                        binding.emptyVaultState.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
-                        binding.rvVaultItems.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
-                        
-                        val expiringCount = items.count { it.isExpiringSoon() }
-                        binding.tvToolbarSubtitle.text = if (expiringCount > 0) {
-                            "${items.size} items • $expiringCount expiring soon"
-                        } else {
-                            "${items.size} items"
-                        }
+                    viewModel.assets.collect { assets ->
+                        assetAdapter.submitList(assets)
+                        binding.emptyAssetsState.visibility = if (assets.isEmpty()) View.VISIBLE else View.GONE
+                        binding.rvAssets.visibility = if (assets.isEmpty()) View.GONE else View.VISIBLE
+                        binding.tvToolbarSubtitle.text = "${assets.size} active shared assets"
                     }
                 }
                 launch {

@@ -72,11 +72,20 @@
             android:id="@+id/action_dashboard_to_addAsset"
             app:destination="@id/addAssetFragment" />
         <action
-            android:id="@+id/action_dashboard_to_vault"
-            app:destination="@id/vaultFragment" />
+            android:id="@+id/action_dashboard_to_houseSetup"
+            app:destination="@id/houseSetupFragment"
+            app:popUpTo="@id/dashboardFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/assetsFragment"
+        android:name="com.example.expensemanager.ui.AssetsFragment"
+        android:label="Shared Assets"
+        tools:layout="@layout/fragment_assets">
         <action
-            android:id="@+id/action_dashboard_to_members"
-            app:destination="@id/membersFragment" />
+            android:id="@+id/action_assets_to_addAsset"
+            app:destination="@id/addAssetFragment" />
     </fragment>
 
     <fragment
