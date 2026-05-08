@@ -27,15 +27,15 @@ class SplashFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lifecycleScope.launch {
-            delay(1500)
+            delay(1000)
             val user = authRepo.getCurrentUser()
+            val prefs = PrefsManager(requireContext())
+            
             if (user != null) {
-                val prefs = PrefsManager(requireContext())
                 if (prefs.isHouseSetup()) {
                     findNavController().navigate(R.id.action_splash_to_dashboard)
                 } else {
-                    // Redirect to Auth then Setup, or directly to Setup if graph allows
-                    findNavController().navigate(R.id.action_splash_to_auth)
+                    findNavController().navigate(R.id.action_splash_to_houseSetup)
                 }
             } else {
                 findNavController().navigate(R.id.action_splash_to_auth)

@@ -32,8 +32,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // kotlinOptions is deprecated/removed in AGP 9.0 built-in Kotlin.
-    // It defaults to the Java version set in compileOptions above.
+    // Fix for "Android 16 KB Alignment" warning/error on API 35+
+    // Setting useLegacyPackaging to true compresses JNI libraries, 
+    // which works around alignment issues in prebuilt libraries.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 
     buildFeatures {
         viewBinding = true

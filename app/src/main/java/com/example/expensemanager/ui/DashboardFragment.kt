@@ -39,8 +39,14 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         prefs = PrefsManager(requireContext())
         
-        // Set houseId in ViewModel — triggers data loading
-        viewModel.setHouseId(prefs.houseId)
+        val currentHouseId = prefs.houseId
+        if (currentHouseId.isEmpty()) {
+            // If we somehow reached here without a house, go to setup
+            findNavController().navigate(R.id.action_auth_to_houseSetup)
+            return
+        }
+
+        viewModel.setHouseId(currentHouseId)
         
         setupToolbar()
         setupRecyclerView()
@@ -57,8 +63,14 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            findNavController().navigate(R.id.authFragment)
+            return
+        }
+
         billAdapter = BillAdapter(
-            currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+            currentUserId = user.uid,
             onPayClick = { bill -> viewModel.markPaid(bill.id) }
         )
         binding.rvBills.adapter = billAdapter
@@ -90,12 +102,17 @@ class DashboardFragment : Fragment() {
                 }
                 launch {
                     viewModel.totalMonthly.collect { total ->
-                        binding.tvTotalMonthly.text = " %.0f".format(total)
+                        binding.tvTotalMonthly.text = String.format(" %.0f", total)
                     }
                 }
                 launch {
                     viewModel.myTotalDue.collect { due ->
-                        binding.tvDueAmount.text = " %.0f".format(due)
+                        binding.tvDueAmount.text = String.format(" %.0f", due)
+                    }
+                }
+                launch {
+                    viewModel.myTotalPaid.collect { paid ->
+                        binding.tvPaidAmount.text = String.format(" %.0f", paid)
                     }
                 }
                 launch {
