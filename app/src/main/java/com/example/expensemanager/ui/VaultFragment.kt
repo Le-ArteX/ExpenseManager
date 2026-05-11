@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -84,10 +85,24 @@ class VaultFragment : Fragment() {
     private fun setupRecyclerView() {
         vaultAdapter = VaultAdapter(
             onItemClick = { item ->
-                // Handle item click
+                // Handle item click (e.g., show details)
+            },
+            onDeleteClick = { item ->
+                showDeleteConfirmation(item)
             }
         )
         binding.rvVaultItems.adapter = vaultAdapter
+    }
+
+    private fun showDeleteConfirmation(item: com.example.expensemanager.model.WarrantyItem) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Item")
+            .setMessage("Are you sure you want to delete ${item.itemName}?")
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteWarrantyItem(item)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun observeData() {

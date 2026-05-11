@@ -11,7 +11,8 @@ import com.example.expensemanager.databinding.ItemVaultBinding
 import com.example.expensemanager.model.WarrantyItem
 
 class VaultAdapter(
-    private val onItemClick: (WarrantyItem) -> Unit
+    private val onItemClick: (WarrantyItem) -> Unit,
+    private val onDeleteClick: (WarrantyItem) -> Unit
 ) : ListAdapter<WarrantyItem, VaultAdapter.VaultViewHolder>(DIFF_CALLBACK) {
 
     inner class VaultViewHolder(private val binding: ItemVaultBinding) :
@@ -33,9 +34,10 @@ class VaultAdapter(
             binding.tvWarrantyStatus.setTextColor(ContextCompat.getColor(binding.root.context, statusColor))
             
             val count = item.receiptImageUrls.size
-            binding.tvViewReceipt.text = if (count > 0) "$count receipts saved" else "No receipts"
+            binding.tvViewReceipt.text = if (count > 0) "$count receipts" else "No receipts"
             
             binding.root.setOnClickListener { onItemClick(item) }
+            binding.btnDelete.setOnClickListener { onDeleteClick(item) }
         }
     }
 

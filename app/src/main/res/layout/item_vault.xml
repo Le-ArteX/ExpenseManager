@@ -47,14 +47,30 @@
             <TextView android:id="@+id/tvPrice"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:textSize="13sp" android:textStyle="bold" android:textColor="@color/teal_dark"/>
-            <TextView android:id="@+id/tvViewReceipt"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="View Receipt" android:textSize="11sp"
-                android:textStyle="bold"
-                android:textColor="@color/teal_primary"
-                android:layout_marginTop="8dp"
-                android:padding="4dp"
-                android:background="?attr/selectableItemBackground"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <TextView android:id="@+id/tvViewReceipt"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Receipts" android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/teal_primary"
+                    android:padding="4dp"
+                    android:background="?attr/selectableItemBackground"/>
+
+                <ImageButton
+                    android:id="@+id/btnDelete"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_delete"
+                    app:tint="@color/red_error" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -7,11 +7,14 @@ import com.google.firebase.ktx.Firebase
 import com.example.expensemanager.model.Bill
 import com.example.expensemanager.model.House
 import com.example.expensemanager.model.Member
+import com.example.expensemanager.model.Notification
 import com.example.expensemanager.model.SharedAsset
 import com.example.expensemanager.model.WarrantyItem
 import com.example.expensemanager.repository.AssetRepository
 import com.example.expensemanager.repository.HouseRepository
+import com.example.expensemanager.repository.NotificationRepository
 import com.example.expensemanager.repository.VaultRepository
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
@@ -19,7 +22,8 @@ import java.io.File
 class AssetViewModel(
     private val assetRepo : AssetRepository = AssetRepository(),
     private val vaultRepo : VaultRepository = VaultRepository(),
-    private val houseRepo : HouseRepository = HouseRepository()
+    private val houseRepo : HouseRepository = HouseRepository(),
+    private val notificationRepo: NotificationRepository = NotificationRepository()
 ) : ViewModel() {
     private val uid get() = Firebase.auth.currentUser?.uid ?: ""
     private val _houseId = MutableStateFlow("")
@@ -48,6 +52,11 @@ class AssetViewModel(
     val warrantyItems: StateFlow<List<WarrantyItem>> = _houseId
         .filter { it.isNotEmpty() }
         .flatMapLatest { vaultRepo.getWarrantyItems(it) }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val notifications: StateFlow<List<Notification>> = _houseId
+        .filter { it.isNotEmpty() }
+        .flatMapLatest { notificationRepo.getNotifications(it) }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val totalMonthly: StateFlow<Double> = assets
@@ -83,17 +92,21 @@ class AssetViewModel(
                 monthlyAmount = amount, dueDay = dueDay,
                 splitAmong = members, notes = notes)
             val r = assetRepo.addAsset(_houseId.value, asset)
-            _uiState.value = if (r.isSuccess)
+            _uiState.value = if (r.isSuccess) {
+                sendNotification("Asset Added", "$name has been added to assets.")
                 UiState.Success("Asset added! Bill scheduled automatically.")
-            else UiState.Error(r.exceptionOrNull()?.message ?: "Failed")
+            } else UiState.Error(r.exceptionOrNull()?.message ?: "Failed")
         }
     }
 
     fun markPaid(billId: String) {
         viewModelScope.launch {
             val r = assetRepo.markMemberPaid(_houseId.value, billId, uid)
-            if (r.isFailure)
+            if (r.isFailure) {
                 _uiState.value = UiState.Error("Could not mark as paid. Please retry.")
+            } else {
+                sendNotification("Bill Paid", "A member has paid their share of a bill.")
+            }
         }
     }
 
@@ -107,10 +120,39 @@ class AssetViewModel(
                     up.getOrThrow().also { urls.add(it) }
                 }
                 vaultRepo.saveWarrantyItem(_houseId.value, item.copy(receiptImageUrls = urls))
+                sendNotification("Vault Item Added", "${item.itemName} added to Warranty Vault.")
                 _uiState.value = UiState.Success("Item added to Warranty Vault!")
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Upload failed")
             }
+        }
+    }
+
+    fun deleteWarrantyItem(item: WarrantyItem) {
+        viewModelScope.launch {
+            val result = vaultRepo.deleteItem(_houseId.value, item.id)
+            if (result.isSuccess) {
+                sendNotification("Vault Item Deleted", "${item.itemName} removed from Warranty Vault.")
+            }
+        }
+    }
+
+    private fun sendNotification(title: String, message: String) {
+        viewModelScope.launch {
+            val notification = Notification(
+                title = title,
+                message = message,
+                type = "INFO",
+                timestamp = Timestamp.now(),
+                houseId = _houseId.value
+            )
+            notificationRepo.addNotification(_houseId.value, notification)
+        }
+    }
+
+    fun markNotificationRead(notificationId: String) {
+        viewModelScope.launch {
+            notificationRepo.markAsRead(_houseId.value, notificationId)
         }
     }
 
