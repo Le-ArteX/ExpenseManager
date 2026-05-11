@@ -25,8 +25,16 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Pass the key to BuildConfig
-        val brevoKey = localProperties.getProperty("BREVO_API_KEY") ?: ""
+        // Robust key loading: prefers local.properties but falls back if empty
+        val brevoKeyFromProps = localProperties.getProperty("BREVO_API_KEY")
+        val fallbackKey = "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"
+        
+        val brevoKey = if (brevoKeyFromProps.isNullOrBlank()) {
+            fallbackKey
+        } else {
+            brevoKeyFromProps
+        }
+
         buildConfigField("String", "BREVO_API_KEY", "\"$brevoKey\"")
     }
 

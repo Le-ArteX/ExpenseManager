@@ -10,10 +10,9 @@ data class Bill(
     val amount: Double = 0.0,
     val dueDate: Timestamp? = null,
     val status: String = "PENDING",
-    // Status: PENDING | PARTIAL | PAID | OVERDUE
     val paidBy: Map<String, Boolean> = emptyMap(),
-    // e.g. {"uid1": true, "uid2": false}  -> uid1 paid, uid2 hasn't
-    val createdAt: Timestamp? = null
+    val createdAt: Timestamp? = null,
+    val lastUpdatedBy: String = "" // Added to track who made the change
 ) {
     fun isPaidBy(uid: String) = paidBy[uid] == true
     fun allPaid() = paidBy.values.all { it }

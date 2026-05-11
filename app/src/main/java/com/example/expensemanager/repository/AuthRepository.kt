@@ -8,7 +8,9 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.example.expensemanager.model.Member
+import com.example.expensemanager.BuildConfig
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
 import retrofit2.Retrofit
@@ -26,61 +28,61 @@ class AuthRepository {
 
     private val brevoApi = retrofit.create(BrevoApiService::class.java)
 
-    // Using the API key directly as the BuildConfig generation was not working correctly.
-    private val BREVO_API_KEY = "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"
-    
+    private val BREVO_API_KEY = BuildConfig.BREVO_API_KEY
     private val SENDER_EMAIL  = "mursalinleon2295@gmail.com"
 
     fun getCurrentUser(): FirebaseUser? = auth.currentUser
 
     suspend fun sendOtp(email: String): Result<Unit> {
         return try {
-            Log.d("OTP_FLOW", "Using hardcoded API Key. Length: ${BREVO_API_KEY.length}")
+            Log.d("OTP_FLOW", "Starting OTP process for $email")
             
-            if (BREVO_API_KEY.isEmpty()) {
-                return Result.failure(Exception("API Key missing."))
+            if (BREVO_API_KEY.isBlank()) {
+                Log.e("OTP_FLOW", "BREVO_API_KEY is empty! Check local.properties and Sync Gradle.")
+                return Result.failure(Exception("API Configuration missing"))
             }
 
             val otp = (100000..999999).random().toString()
             
-            val data = mapOf(
+            db.collection("otps").document(email).set(mapOf(
                 "otp" to otp,
                 "createdAt" to Timestamp.now(),
                 "email" to email
-            )
-            db.collection("otps").document(email).set(data).await()
+            )).await()
             
             val emailRequest = BrevoEmailRequest(
                 sender = BrevoSender("Expense Manager", SENDER_EMAIL),
                 to = listOf(BrevoTo(email)),
                 subject = "Your Verification Code",
                 htmlContent = """
-                    <html>
-                        <body style="font-family: sans-serif; padding: 20px; text-align: center;">
-                            <h2 style="color: #333;">Verification Code</h2>
-                            <p>Use the code below to verify your account in Expense Manager:</p>
-                            <div style="background: #f4f4f4; padding: 20px; display: inline-block; border-radius: 10px; border: 1px solid #ddd;">
-                                <h1 style="color: #008080; letter-spacing: 5px; margin: 0;">$otp</h1>
-                            </div>
-                            <p style="color: #777; margin-top: 20px;">This code will expire in 5 minutes.</p>
-                        </body>
-                    </html>
+                    <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+                        <h2>Verification Code</h2>
+                        <h1 style="color: #008080; font-size: 32px; letter-spacing: 5px;">$otp</h1>
+                        <p>Valid for 5 minutes.</p>
+                    </div>
                 """.trimIndent()
             )
 
             val response = brevoApi.sendEmail(BREVO_API_KEY, emailRequest)
-            
             if (response.isSuccessful) {
-                Log.d("OTP_FLOW", "Brevo Success")
+                Log.d("OTP_FLOW", "Email sent successfully to $email")
                 Result.success(Unit)
             } else {
                 val errorJson = response.errorBody()?.string() ?: "{}"
-                Log.e("OTP_FLOW", "Brevo Failed (${response.code()}): $errorJson")
-                val msg = try { JSONObject(errorJson).getString("message") } catch (e: Exception) { errorJson }
-                Result.failure(Exception("Brevo Error (${response.code()}): $msg"))
+                Log.e("OTP_FLOW", "Brevo API Error: $errorJson")
+                
+                val rawMsg = try { JSONObject(errorJson).getString("message") } catch (e: Exception) { errorJson }
+                
+                // Better error message parsing
+                val userMsg = when {
+                    rawMsg.contains("api key", ignoreCase = true) -> "Invalid API Key. Update local.properties."
+                    rawMsg.contains("unauthorized", ignoreCase = true) -> "IP Blocked or Unauthorized. Check Brevo settings."
+                    else -> "Brevo Error: $rawMsg"
+                }
+                Result.failure(Exception(userMsg))
             }
         } catch (e: Exception) {
-            Log.e("OTP_FLOW", "Error: ${e.message}")
+            Log.e("OTP_FLOW", "Exception in sendOtp: ${e.message}")
             Result.failure(e)
         }
     }
@@ -91,99 +93,69 @@ class AuthRepository {
             if (doc.exists()) {
                 val storedOtp = doc.getString("otp")
                 val createdAt = doc.getTimestamp("createdAt")
-                
                 if (storedOtp == enteredOtp && createdAt != null) {
-                    val diff = (Timestamp.now().seconds - createdAt.seconds)
-                    if (diff < 300) { 
+                    if (Timestamp.now().seconds - createdAt.seconds < 300) {
                         db.collection("otps").document(email).delete()
                         return true
                     }
                 }
             }
             false
-        } catch (e: Exception) {
-            false
-        }
+        } catch (e: Exception) { false }
     }
 
-    suspend fun resetPassword(email: String, newPass: String): Result<Unit> {
+    suspend fun registerWithEmail(email: String, pass: String, name: String): Result<FirebaseUser> {
         return try {
-            val user = auth.currentUser
-            if (user != null && user.email == email) {
-                user.updatePassword(newPass).await()
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Manual password reset requires backend integration."))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun registerWithEmail(
-        email: String, password: String, displayName: String
-    ): Result<FirebaseUser> {
-        return try {
-            val result = auth.createUserWithEmailAndPassword(email, password).await()
-            val user = result.user ?: throw Exception("Registration failed")
-            user.updateProfile(
-                UserProfileChangeRequest.Builder().setDisplayName(displayName).build()
-            ).await()
-            saveMemberProfile(user, displayName)
+            val res = auth.createUserWithEmailAndPassword(email, pass).await()
+            val user = res.user ?: throw Exception("Registration failed")
+            user.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build()).await()
+            saveMemberProfile(user, name)
+            syncFcmToken() // Ensure token is saved after registration
             Result.success(user)
-        } catch (e: Exception) {
-            Log.e("AuthRepository", "Registration Error: ${e.message}", e)
-            Result.failure(Exception(friendlyAuthError(e.message)))
-        }
+        } catch (e: Exception) { Result.failure(e) }
     }
 
-    suspend fun loginWithEmail(email: String, password: String): Result<FirebaseUser> {
+    suspend fun loginWithEmail(email: String, pass: String): Result<FirebaseUser> {
         return try {
-            val result = auth.signInWithEmailAndPassword(email, password).await()
-            Result.success(result.user ?: throw Exception("Login failed"))
-        } catch (e: Exception) {
-            Log.e("AuthRepository", "Login Error: ${e.message}", e)
-            Result.failure(Exception(friendlyAuthError(e.message)))
-        }
+            val res = auth.signInWithEmailAndPassword(email, pass).await()
+            val user = res.user ?: throw Exception("Login failed")
+            syncFcmToken() // Ensure token is saved after login
+            Result.success(user)
+        } catch (e: Exception) { Result.failure(e) }
     }
 
     suspend fun loginWithGoogle(idToken: String): Result<FirebaseUser> {
         return try {
-            val cred = GoogleAuthProvider.getCredential(idToken, null)
-            val result = auth.signInWithCredential(cred).await()
-            val user = result.user ?: throw Exception("Google sign-in failed")
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val res = auth.signInWithCredential(credential).await()
+            val user = res.user ?: throw Exception("Google login failed")
             
-            val doc = db.collection("members").document(user.uid).get().await()
-            if (!doc.exists()) {
+            if (res.additionalUserInfo?.isNewUser == true) {
                 saveMemberProfile(user, user.displayName ?: "User")
             }
             
+            syncFcmToken()
             Result.success(user)
-        } catch (e: Exception) {
-            Log.e("AuthRepository", "Google Login Error: ${e.message}")
-            Result.failure(Exception("Google sign-in failed"))
-        }
+        } catch (e: Exception) { Result.failure(e) }
     }
 
     suspend fun getMemberProfile(uid: String): Member? {
         return try {
             db.collection("members").document(uid).get().await().toObject(Member::class.java)
         } catch (e: Exception) {
-            Log.e("AuthRepository", "Error fetching profile: ${e.message}")
+            Log.e("AuthRepo", "Error getting profile: ${e.message}")
             null
         }
     }
 
-    suspend fun sendPasswordReset(email: String): Result<Unit> {
-        return try {
-            auth.sendPasswordResetEmail(email).await()
-            Result.success(Unit)
+    private suspend fun syncFcmToken() {
+        try {
+            val token = FirebaseMessaging.getInstance().token.await()
+            updateFcmToken(token)
         } catch (e: Exception) {
-            Result.failure(Exception("Could not send reset email"))
+            Log.e("AuthRepo", "FCM Token sync failed: ${e.message}")
         }
     }
-
-    fun logout() = auth.signOut()
 
     suspend fun updateFcmToken(token: String) {
         val uid = auth.currentUser?.uid ?: return
@@ -199,18 +171,14 @@ class AuthRepository {
         db.collection("members").document(user.uid).set(member).await()
     }
 
-    private fun friendlyAuthError(msg: String?): String = when {
-        msg?.contains("email address is already") == true ->
-            "This email is already registered. Please login."
-        msg?.contains("no user record") == true ->
-            "No account found. Please register first."
-        msg?.contains("password is invalid") == true ||
-                msg?.contains("wrong-password") == true ->
-            "Incorrect password. Please try again."
-        msg?.contains("too-many-requests") == true ->
-            "Too many failed attempts. Please wait a few minutes."
-        msg?.contains("network") == true ->
-            "No internet connection. Please check your network."
-        else -> msg ?: "Authentication failed. Please try again."
+    fun logout() = auth.signOut()
+
+    suspend fun resetPassword(email: String, newPass: String): Result<Unit> {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
