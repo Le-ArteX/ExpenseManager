@@ -36,7 +36,7 @@ class AuthRepository {
 
     suspend fun sendOtp(email: String): Result<Unit> {
         return try {
-            Log.d("OTP_FLOW", "Generating OTP for $email")
+            Log.d("OTP_FLOW", "Generating OTP for $email using Key: ${BREVO_API_KEY.take(10)}...")
             
             if (BREVO_API_KEY.isBlank()) {
                 return Result.failure(Exception("Brevo API Key is missing. Check local.properties and Sync Gradle."))
@@ -56,11 +56,13 @@ class AuthRepository {
                 to = listOf(BrevoTo(email)),
                 subject = "Your Verification Code: $otp",
                 htmlContent = """
-                    <div style="font-family: sans-serif; text-align: center; padding: 30px;">
+                    <div style="font-family: sans-serif; text-align: center; padding: 30px; background-color: #f9f9f9; border-radius: 10px;">
                         <h2 style="color: #00695C;">FlatShare Verification</h2>
-                        <p>Use the code below to verify your identity.</p>
-                        <h1 style="color: #004D40; letter-spacing: 6px; font-size: 36px;">$otp</h1>
-                        <p>Valid for 5 minutes.</p>
+                        <p style="color: #555;">Use the code below to verify your identity.</p>
+                        <div style="background: white; padding: 20px; border-radius: 8px; display: inline-block; border: 1px solid #ddd;">
+                            <h1 style="color: #004D40; letter-spacing: 6px; font-size: 36px; margin: 0;">$otp</h1>
+                        </div>
+                        <p style="color: #888; margin-top: 20px;">This code is valid for 5 minutes.</p>
                     </div>
                 """.trimIndent()
             )
@@ -71,8 +73,13 @@ class AuthRepository {
                 Result.success(Unit)
             } else {
                 val errorJson = response.errorBody()?.string() ?: "{}"
-                Log.e("OTP_FLOW", "Brevo API Error: $errorJson")
-                val msg = try { JSONObject(errorJson).getString("message") } catch (e: Exception) { "Service error" }
+                Log.e("OTP_FLOW", "Brevo API Error ${response.code()}: $errorJson")
+                val msg = try { 
+                    val obj = JSONObject(errorJson)
+                    obj.optString("message", obj.optString("error", "Email delivery failed"))
+                } catch (e: Exception) { "Service error: ${response.message()}" }
+                
+                // If you get "sender not found", you must verify the email in Brevo dashboard
                 Result.failure(Exception(msg))
             }
         } catch (e: Exception) {
@@ -88,9 +95,8 @@ class AuthRepository {
                 val storedOtp = doc.getString("otp")
                 val createdAt = doc.getTimestamp("createdAt")
                 if (storedOtp == enteredOtp && createdAt != null) {
-                    // Valid for 5 minutes
                     if (Timestamp.now().seconds - createdAt.seconds < 300) {
-                        db.collection("otps").document(email).delete()
+                        // Success!
                         return true
                     }
                 }
@@ -105,7 +111,6 @@ class AuthRepository {
             val res = auth.signInWithCredential(credential).await()
             val user = res.user ?: throw Exception("Google login failed")
             
-            // AUTOMATIC REGISTRATION: Create profile if it doesn't exist
             val profileDoc = db.collection("members").document(user.uid).get().await()
             if (!profileDoc.exists()) {
                 saveMemberProfile(user, user.displayName ?: "Google User")
@@ -113,7 +118,10 @@ class AuthRepository {
             
             syncFcmToken()
             Result.success(user)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) { 
+            Log.e("AuthRepo", "Google login failed", e)
+            Result.failure(e) 
+        }
     }
 
     suspend fun registerWithEmail(email: String, pass: String, name: String): Result<FirebaseUser> {
@@ -136,10 +144,10 @@ class AuthRepository {
         } catch (e: Exception) { Result.failure(e) }
     }
 
-    // Standard Firebase password reset
-    suspend fun resetPassword(email: String, newPass: String): Result<Unit> {
+    // This method now handles password reset properly
+    // It will send the official Firebase Reset Email which is the only way to reset a forgotten password
+    suspend fun resetPassword(email: String, dummy: String = ""): Result<Unit> {
         return try {
-            // The most secure and standard way to reset a forgotten password in Firebase
             auth.sendPasswordResetEmail(email).await()
             Result.success(Unit)
         } catch (e: Exception) {
