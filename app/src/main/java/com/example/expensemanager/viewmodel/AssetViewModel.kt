@@ -44,6 +44,11 @@ class AssetViewModel(
         .flatMapLatest { assetRepo.getPendingBills(it) }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    val allBills: StateFlow<List<Bill>> = _houseId
+        .filter { it.isNotEmpty() }
+        .flatMapLatest { assetRepo.getAllBills(it) }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     val assets: StateFlow<List<SharedAsset>> = _houseId
         .filter { it.isNotEmpty() }
         .flatMapLatest { assetRepo.getAssets(it) }
@@ -63,12 +68,17 @@ class AssetViewModel(
         .map { it.sumOf { a -> a.monthlyAmount } }
         .stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
 
-    val myTotalDue: StateFlow<Double> = pendingBills
-        .map { bills -> bills.filter { !it.isPaidBy(uid) }.sumOf { it.perPersonAmount() } }
+    // Simplified totals: Sum all bills regardless of month to ensure visibility
+    val myTotalDue: StateFlow<Double> = allBills
+        .map { bills -> 
+            bills.filter { !it.isPaidBy(uid) }.sumOf { it.perPersonAmount() }
+        }
         .stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
 
-    val myTotalPaid: StateFlow<Double> = pendingBills
-        .map { bills -> bills.filter { it.isPaidBy(uid) }.sumOf { it.perPersonAmount() } }
+    val myTotalPaid: StateFlow<Double> = allBills
+        .map { bills -> 
+            bills.filter { it.isPaidBy(uid) }.sumOf { it.perPersonAmount() }
+        }
         .stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
 
     // Category filter
@@ -92,20 +102,29 @@ class AssetViewModel(
                 monthlyAmount = amount, dueDay = dueDay,
                 splitAmong = members, notes = notes)
             val r = assetRepo.addAsset(_houseId.value, asset)
-            _uiState.value = if (r.isSuccess) {
+            if (r.isSuccess) {
                 sendNotification("Asset Added", "$name has been added to assets.")
-                UiState.Success("Asset added! Bill scheduled automatically.")
-            } else UiState.Error(r.exceptionOrNull()?.message ?: "Failed")
+                _uiState.value = UiState.Success("Asset added! Bill scheduled.")
+            } else {
+                _uiState.value = UiState.Error(r.exceptionOrNull()?.message ?: "Failed")
+            }
         }
     }
 
     fun markPaid(billId: String) {
+        if (uid.isEmpty()) {
+            _uiState.value = UiState.Error("Auth error: Please log in again.")
+            return
+        }
         viewModelScope.launch {
+            _uiState.value = UiState.Loading
             val r = assetRepo.markMemberPaid(_houseId.value, billId, uid)
-            if (r.isFailure) {
-                _uiState.value = UiState.Error("Could not mark as paid. Please retry.")
+            if (r.isSuccess) {
+                sendNotification("Bill Paid", "You paid your share of a bill.")
+                _uiState.value = UiState.Success("Successfully marked as paid!")
             } else {
-                sendNotification("Bill Paid", "A member has paid their share of a bill.")
+                val errorMsg = r.exceptionOrNull()?.message ?: "Could not mark as paid."
+                _uiState.value = UiState.Error(errorMsg)
             }
         }
     }
@@ -132,7 +151,7 @@ class AssetViewModel(
         viewModelScope.launch {
             val result = vaultRepo.deleteItem(_houseId.value, item.id)
             if (result.isSuccess) {
-                sendNotification("Vault Item Deleted", "${item.itemName} removed from Warranty Vault.")
+                sendNotification("Vault Item Deleted", "${item.itemName} removed.")
             }
         }
     }
