@@ -10,7 +10,6 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.expensemanager.databinding.ActivityMainBinding
 import com.example.expensemanager.repository.AuthRepository
-import com.example.expensemanager.repository.HouseRepository
 import com.example.expensemanager.util.NotificationHelper
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
@@ -45,7 +44,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.resetPasswordFragment,
                 R.id.houseSetupFragment,
                 R.id.cameraFragment,
-                R.id.addAssetFragment,
                 R.id.addVaultItemFragment
             )
             binding.bottomNav.visibility =
@@ -81,8 +79,6 @@ class MainActivity : AppCompatActivity() {
     private fun startListeningForBills(hId: String) {
         billsListener?.remove()
         
-        val currentUid = authRepo.getCurrentUser()?.uid
-        
         billsListener = FirebaseFirestore.getInstance()
             .collection("houses").document(hId)
             .collection("bills")
@@ -92,14 +88,13 @@ class MainActivity : AppCompatActivity() {
                     return@addSnapshotListener
                 }
 
-                for (dc in snapshots!!.documentChanges) {
+                if (snapshots == null) return@addSnapshotListener
+
+                for (dc in snapshots.documentChanges) {
                     if (dc.type == DocumentChange.Type.ADDED) {
                         val billName = dc.document.getString("assetName") ?: "New Bill"
                         val amount = dc.document.getDouble("amount") ?: 0.0
                         
-                        // Only notify if someone ELSE added the bill
-                        // Note: We'd need a 'createdBy' field in Bill model for perfect filtering
-                        // For now, we show it to ensure the feature is visible
                         NotificationHelper.showNotification(
                             this,
                             "New Bill Added",
