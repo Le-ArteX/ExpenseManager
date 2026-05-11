@@ -40,6 +40,9 @@ class MainActivity : AppCompatActivity() {
             val hideOnScreens = setOf(
                 R.id.splashFragment,
                 R.id.authFragment,
+                R.id.forgotPasswordFragment,
+                R.id.otpFragment,
+                R.id.resetPasswordFragment,
                 R.id.houseSetupFragment,
                 R.id.cameraFragment,
                 R.id.addAssetFragment,
