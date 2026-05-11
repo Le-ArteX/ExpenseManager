@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/teal_dark">
+
     <!-- TOP HEADER SECTION -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,6 +16,14 @@
         android:gravity="center_horizontal|bottom"
         android:paddingBottom="28dp"
         android:paddingHorizontal="24dp">
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@mipmap/ic_launcher"
+            android:layout_marginBottom="12dp"
+            android:contentDescription="App Logo"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -23,6 +32,7 @@
             android:textStyle="bold"
             android:textColor="@color/white"
             android:fontFamily="sans-serif-medium"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -31,6 +41,7 @@
             android:textColor="#B2DFDB"
             android:layout_marginTop="6dp"/>
     </LinearLayout>
+
     <!-- BOTTOM CARD SECTION -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
@@ -39,10 +50,12 @@
         app:cardCornerRadius="28dp"
         app:cardBackgroundColor="@color/gray_surface"
         app:cardElevation="12dp">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
             <!-- Drag handle -->
             <View
                 android:layout_width="40dp"
@@ -50,6 +63,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="14dp"
                 android:background="@color/text_hint"/>
+
             <!-- Tabs: Login | Register -->
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
@@ -62,15 +76,18 @@
                 app:tabSelectedTextColor="@color/teal_dark"
                 app:tabTextColor="@color/text_secondary"
                 app:tabTextAppearance="@style/TabTextAppearance">
+
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/login"/>
+
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/register"/>
             </com.google.android.material.tabs.TabLayout>
+
             <!-- ViewPager holds login/register fragments -->
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/viewPager"

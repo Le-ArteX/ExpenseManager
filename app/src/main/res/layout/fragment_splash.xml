@@ -14,15 +14,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
+
         <!-- App Logo -->
-        <TextView
-            android:layout_width="88dp"
-            android:layout_height="88dp"
-            android:text="■"
-            android:textSize="48sp"
-            android:gravity="center"
-            android:background="@drawable/bg_circle_teal"
-            android:layout_marginBottom="20dp"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@mipmap/ic_launcher"
+            android:layout_marginBottom="20dp"
+            android:contentDescription="App Logo"/>
+
         <!-- App Name -->
         <TextView
             android:layout_width="wrap_content"
