@@ -39,7 +39,6 @@ class OtpFragment : Fragment() {
                 return@setOnClickListener
             }
             binding.otpLayout.error = null
-
             verifyOtp(otp)
         }
 
@@ -51,34 +50,42 @@ class OtpFragment : Fragment() {
     private fun verifyOtp(otp: String) {
         setLoading(true)
         viewLifecycleOwner.lifecycleScope.launch {
-            // Note: In a real app, this would verify with a backend or Firestore
-            // For this implementation, we simulate verification
             val isValid = authRepo.verifyOtp(args.email, otp)
-            setLoading(false)
-
             if (isValid) {
                 if (args.type == "FORGOT_PASSWORD") {
-                    val action = OtpFragmentDirections.actionOtpToResetPassword(args.email)
-                    findNavController().navigate(action)
+                    // Trigger official Firebase reset link after OTP is verified
+                    val result = authRepo.resetPassword(args.email)
+                    setLoading(false)
+                    if (result.isSuccess) {
+                        Toast.makeText(requireContext(), "Verified! Check your email for the final reset link.", Toast.LENGTH_LONG).show()
+                        findNavController().popBackStack(R.id.authFragment, false)
+                    } else {
+                        Toast.makeText(requireContext(), "Error sending reset link: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    // REGISTER flow - complete registration
                     performRegistration()
                 }
             } else {
+                setLoading(false)
                 Toast.makeText(requireContext(), "Invalid or expired OTP", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun resendOtp() {
+        setLoading(true)
         viewLifecycleOwner.lifecycleScope.launch {
-            authRepo.sendOtp(args.email)
-            Toast.makeText(requireContext(), "OTP resent!", Toast.LENGTH_SHORT).show()
+            val result = authRepo.sendOtp(args.email)
+            setLoading(false)
+            result.onSuccess {
+                Toast.makeText(requireContext(), "A new OTP has been sent!", Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                Toast.makeText(requireContext(), it.message ?: "Failed to resend", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
     private fun performRegistration() {
-        setLoading(true)
         viewLifecycleOwner.lifecycleScope.launch {
             val result = authRepo.registerWithEmail(args.email, args.password, args.name)
             setLoading(false)
@@ -93,6 +100,7 @@ class OtpFragment : Fragment() {
     private fun setLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         binding.btnVerify.isEnabled = !isLoading
+        binding.tvResendOtp.isEnabled = !isLoading
     }
 
     override fun onDestroyView() {

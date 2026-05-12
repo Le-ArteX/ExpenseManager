@@ -55,7 +55,8 @@ class ResetPasswordFragment : Fragment() {
     private fun updatePassword(newPass: String) {
         setLoading(true)
         viewLifecycleOwner.lifecycleScope.launch {
-            val result = authRepo.resetPassword(args.email, newPass)
+            val result = authRepo.resetPassword(args.email,
+                        newPass)
             setLoading(false)
             result.onSuccess {
                 Toast.makeText(requireContext(), "Password updated successfully! Please login.", Toast.LENGTH_LONG).show()
