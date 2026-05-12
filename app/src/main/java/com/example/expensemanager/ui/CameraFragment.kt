@@ -175,8 +175,18 @@ class CameraFragment : Fragment() {
             }
 
             if (result.isSuccess) {
-                Toast.makeText(requireContext(), "Receipt saved!", Toast.LENGTH_SHORT).show()
-                findNavController().popBackStack()
+                val url = result.getOrNull() ?: ""
+                Toast.makeText(requireContext(), "Receipt uploaded!", Toast.LENGTH_SHORT).show()
+                
+                if (args.warrantyItemId.isBlank()) {
+                    // Navigate to Add Item screen with this receipt
+                    val action = CameraFragmentDirections.actionCameraToAddVaultItem(
+                        initialReceiptUrl = url
+                    )
+                    findNavController().navigate(action)
+                } else {
+                    findNavController().popBackStack()
+                }
             } else {
                 val error = result.exceptionOrNull()?.message ?: "Unknown error"
                 Log.e("CameraFragment", "Upload failed: $error")

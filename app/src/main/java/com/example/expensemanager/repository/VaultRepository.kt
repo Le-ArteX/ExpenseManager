@@ -22,7 +22,6 @@ class VaultRepository {
     private val auth = Firebase.auth
     
     // Fallback credentials hardcoded to ensure it works even if local.properties fails
-    // Using .contains("localhost") to handle ports like :54321
     private val SUPABASE_URL = if (BuildConfig.SUPABASE_URL.isNotBlank() && !BuildConfig.SUPABASE_URL.contains("localhost")) {
         BuildConfig.SUPABASE_URL
     } else "https://ynlcigkmpdfgswsvntlw.supabase.co"
@@ -49,9 +48,6 @@ class VaultRepository {
     private fun col(houseId: String) =
         db.collection("houses").document(houseId.trim()).collection("warrantyVault")
 
-    /**
-     * Uploads a receipt image to Supabase Storage and returns its public URL.
-     */
     suspend fun uploadReceiptImage(houseId: String, imageFile: File): Result<String> {
         val client = supabase ?: return Result.failure(
             Exception("Supabase client not initialized. Check your credentials.")
@@ -66,21 +62,17 @@ class VaultRepository {
 
         return try {
             val fileName = "receipt_${System.currentTimeMillis()}_${uid}.jpg"
-            val bucketName = "receipts" // Ensure this bucket exists and is public in Supabase
+            val bucketName = "receipts"
             val path = "$cleanHouseId/$fileName"
             
             Log.d("VaultRepo", "Uploading to Supabase: $path")
             
             val bucket = client.storage.from(bucketName)
-            
-            // Upload the file as ByteArray
             bucket.upload(path, imageFile.readBytes()) {
                 upsert = true
             }
             
-            // Get the Public URL
             val publicUrl = bucket.publicUrl(path)
-            
             Log.d("VaultRepo", "Supabase Upload Success: $publicUrl")
             Result.success(publicUrl)
         } catch (e: Exception) {
@@ -90,13 +82,17 @@ class VaultRepository {
     }
 
     suspend fun saveWarrantyItem(houseId: String, item: WarrantyItem): Result<WarrantyItem> {
+        val cleanHouseId = houseId.trim()
+        if (cleanHouseId.isEmpty()) return Result.failure(Exception("House ID is required"))
+
         return try {
-            val ref = col(houseId).add(item.copy(addedBy = uid)).await()
-            val final = item.copy(id = ref.id, houseId = houseId, addedBy = uid)
-            ref.set(final).await()
-            Result.success(final)
+            val docRef = if (item.id.isEmpty()) col(cleanHouseId).document() else col(cleanHouseId).document(item.id)
+            val finalItem = item.copy(id = docRef.id, houseId = cleanHouseId, addedBy = uid)
+            docRef.set(finalItem).await()
+            Result.success(finalItem)
         } catch (e: Exception) {
-            Result.failure(Exception("Failed to save item: ${e.message}"))
+            Log.e("VaultRepo", "Firestore save failed", e)
+            Result.failure(e)
         }
     }
 

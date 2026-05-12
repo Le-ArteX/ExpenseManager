@@ -43,7 +43,6 @@
         <action
             android:id="@+id/action_dashboard_to_assets"
             app:destination="@id/assetsFragment" />
-        <!-- Added actions for bottom nav fragments to ensure reachability -->
         <action
             android:id="@+id/action_dashboard_to_notifications"
             app:destination="@id/notificationsFragment" />
@@ -174,13 +173,29 @@
             android:name="warrantyItemId"
             android:defaultValue=""
             app:argType="string" />
+        <action
+            android:id="@+id/action_camera_to_addVaultItem"
+            app:destination="@id/addVaultItemFragment"
+            app:popUpTo="@id/vaultFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/addVaultItemFragment"
         android:name="com.example.expensemanager.ui.AddVaultItemFragment"
         android:label="Add Item"
-        tools:layout="@layout/fragment_add_vault_item" />
+        tools:layout="@layout/fragment_add_vault_item">
+        <argument
+            android:name="initialReceiptUrl"
+            android:defaultValue=""
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.example.expensemanager.ui.NotificationsFragment"
+        android:label="Notifications"
+        tools:layout="@layout/fragment_notifications" />
+
     <navigation android:id="@+id/navigation"
         app:startDestination="@id/authFragment">
         <fragment

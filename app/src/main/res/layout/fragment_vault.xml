@@ -110,8 +110,7 @@
             <LinearLayout android:id="@+id/emptyVaultState"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:gravity="center"
-                android:visibility="gone"
-                android:paddingVertical="40dp">
+                android:visibility="gone" android:paddingVertical="40dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="■" android:textSize="48sp" android:textColor="@color/gray_border"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -147,15 +146,6 @@
                     android:textStyle="bold"
                     android:textColor="@color/teal_dark"
                     android:layout_marginTop="12dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Use CameraX to capture &amp; store in Firebase Storage"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_secondary"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"/>
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

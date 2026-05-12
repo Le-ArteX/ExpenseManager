@@ -1,14 +1,18 @@
 package com.example.expensemanager.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import coil.load
 import com.example.expensemanager.databinding.FragmentAddVaultItemBinding
 import com.example.expensemanager.model.WarrantyItem
 import com.example.expensemanager.util.PrefsManager
@@ -16,6 +20,7 @@ import com.example.expensemanager.viewmodel.AssetViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.launch
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -23,16 +28,29 @@ class AddVaultItemFragment : Fragment() {
     private var _binding: FragmentAddVaultItemBinding? = null
     private val binding get() = _binding!!
     private val viewModel: AssetViewModel by viewModels()
+    private val args: AddVaultItemFragmentArgs by navArgs()
     private lateinit var prefs: PrefsManager
 
     private var purchaseDate: Date? = null
     private var expiryDate: Date? = null
+    private var selectedImageFile: File? = null
     private val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
+    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            val file = File(requireContext().cacheDir, "temp_receipt_${System.currentTimeMillis()}.jpg")
+            requireContext().contentResolver.openInputStream(it)?.use { input ->
+                file.outputStream().use { output -> input.copyTo(output) }
+            }
+            selectedImageFile = file
+            binding.ivReceiptPreview.visibility = View.VISIBLE
+            binding.ivReceiptPreview.load(file)
+            binding.btnSelectReceipt.text = "Change Receipt"
+        }
+    }
+
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAddVaultItemBinding.inflate(inflater, container, false)
         return binding.root
@@ -46,6 +64,17 @@ class AddVaultItemFragment : Fragment() {
         setupToolbar()
         setupDatePickers()
         observeUiState()
+
+        // Handle initial receipt if passed from CameraFragment
+        if (args.initialReceiptUrl.isNotBlank()) {
+            binding.ivReceiptPreview.visibility = View.VISIBLE
+            binding.ivReceiptPreview.load(args.initialReceiptUrl)
+            binding.btnSelectReceipt.text = "Change Receipt"
+        }
+
+        binding.btnSelectReceipt.setOnClickListener {
+            pickImage.launch("image/*")
+        }
 
         binding.btnSubmit.setOnClickListener { validateAndSubmit() }
     }
@@ -93,14 +122,15 @@ class AddVaultItemFragment : Fragment() {
         }
         binding.nameLayout.error = null
 
-        if (purchaseDate == null) {
-            Toast.makeText(requireContext(), "Select purchase date", Toast.LENGTH_SHORT).show()
+        if (purchaseDate == null || expiryDate == null) {
+            Toast.makeText(requireContext(), "Please select dates", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (expiryDate == null) {
-            Toast.makeText(requireContext(), "Select expiry date", Toast.LENGTH_SHORT).show()
-            return
+        // Keep the initial receipt URL if it was passed from the camera
+        val urls = mutableListOf<String>()
+        if (args.initialReceiptUrl.isNotBlank()) {
+            urls.add(args.initialReceiptUrl)
         }
 
         val item = WarrantyItem(
@@ -109,10 +139,11 @@ class AddVaultItemFragment : Fragment() {
             purchasePrice = price,
             purchaseDate = Timestamp(purchaseDate!!),
             warrantyExpiryDate = Timestamp(expiryDate!!),
-            houseId = prefs.houseId
+            houseId = prefs.houseId,
+            receiptImageUrls = urls
         )
 
-        viewModel.addWarrantyItem(item, null) // Photo support can be added later via CameraFragment
+        viewModel.addWarrantyItem(item, selectedImageFile)
     }
 
     private fun observeUiState() {

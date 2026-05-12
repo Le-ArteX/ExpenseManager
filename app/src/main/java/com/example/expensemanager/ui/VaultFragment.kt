@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
@@ -12,9 +14,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import coil.load
 import com.example.expensemanager.R
 import com.example.expensemanager.adapter.VaultAdapter
 import com.example.expensemanager.databinding.FragmentVaultBinding
+import com.example.expensemanager.model.WarrantyItem
 import com.example.expensemanager.util.PrefsManager
 import com.example.expensemanager.viewmodel.AssetViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -85,7 +89,11 @@ class VaultFragment : Fragment() {
     private fun setupRecyclerView() {
         vaultAdapter = VaultAdapter(
             onItemClick = { item ->
-                // Handle item click (e.g., show details)
+                if (item.receiptImageUrls.isNotEmpty()) {
+                    showReceiptDialog(item.receiptImageUrls.first())
+                } else {
+                    Toast.makeText(requireContext(), "No receipt attached", Toast.LENGTH_SHORT).show()
+                }
             },
             onDeleteClick = { item ->
                 showDeleteConfirmation(item)
@@ -94,7 +102,26 @@ class VaultFragment : Fragment() {
         binding.rvVaultItems.adapter = vaultAdapter
     }
 
-    private fun showDeleteConfirmation(item: com.example.expensemanager.model.WarrantyItem) {
+    private fun showReceiptDialog(url: String) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_view_receipt, null)
+        val imageView = dialogView.findViewById<ImageView>(R.id.ivFullReceipt)
+        val btnClose = dialogView.findViewById<View>(R.id.btnCloseDialog)
+        
+        imageView.load(url) {
+            crossfade(true)
+            placeholder(R.drawable.ic_launcher_foreground)
+            error(R.drawable.ic_launcher_foreground)
+        }
+
+        val dialog = AlertDialog.Builder(requireContext(), android.R.style.Theme_Material_NoActionBar_Fullscreen)
+            .setView(dialogView)
+            .create()
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun showDeleteConfirmation(item: WarrantyItem) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Item")
             .setMessage("Are you sure you want to delete ${item.itemName}?")

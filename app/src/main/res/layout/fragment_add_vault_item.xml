@@ -95,6 +95,35 @@
                 app:strokeColor="@color/gray_border"
                 android:textColor="@color/text_primary" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Receipt Image"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivReceiptPreview"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginBottom="12dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:background="@color/teal_light"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelectReceipt"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginBottom="32dp"
+                android:text="Attach Receipt Photo"
+                app:icon="@android:drawable/ic_menu_camera"
+                app:strokeColor="@color/teal_primary"
+                android:textColor="@color/teal_dark" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSubmit"
                 android:layout_width="match_parent"

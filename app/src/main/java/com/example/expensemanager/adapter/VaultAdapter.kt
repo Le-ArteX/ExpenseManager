@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.example.expensemanager.R
 import com.example.expensemanager.databinding.ItemVaultBinding
 import com.example.expensemanager.model.WarrantyItem
@@ -32,12 +33,24 @@ class VaultAdapter(
                 else -> R.color.red_error
             }
             binding.tvWarrantyStatus.setTextColor(ContextCompat.getColor(binding.root.context, statusColor))
-            
+
+            // Show the first receipt as thumbnail if available
+            if (item.receiptImageUrls.isNotEmpty()) {
+                binding.ivItemThumbnail.load(item.receiptImageUrls.first()) {
+                    crossfade(true)
+                    placeholder(R.drawable.ic_launcher_foreground)
+                    error(R.drawable.ic_launcher_foreground)
+                }
+            } else {
+                binding.ivItemThumbnail.setImageResource(R.drawable.ic_launcher_foreground)
+            }
+
             val count = item.receiptImageUrls.size
             binding.tvViewReceipt.text = if (count > 0) "$count receipts" else "No receipts"
             
             binding.root.setOnClickListener { onItemClick(item) }
             binding.btnDelete.setOnClickListener { onDeleteClick(item) }
+            binding.tvViewReceipt.setOnClickListener { onItemClick(item) }
         }
     }
 
