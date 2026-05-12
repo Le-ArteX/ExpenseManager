@@ -49,6 +49,59 @@
     </fragment>
 
     <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.example.expensemanager.ui.DashboardFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_dashboard">
+        <action
+            android:id="@+id/action_dashboard_to_addAsset"
+            app:destination="@id/addAssetFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_houseSetup"
+            app:destination="@id/houseSetupFragment"
+            app:popUpTo="@id/dashboardFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_dashboard_to_assets"
+            app:destination="@id/assetsFragment" />
+        <!-- Added actions for bottom nav fragments to ensure reachability -->
+        <action
+            android:id="@+id/action_dashboard_to_notifications"
+            app:destination="@id/notificationsFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_members"
+            app:destination="@id/membersFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_vault"
+            app:destination="@id/vaultFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/vaultFragment"
+        android:name="com.example.expensemanager.ui.VaultFragment"
+        android:label="Warranty Vault"
+        tools:layout="@layout/fragment_vault">
+        <action
+            android:id="@+id/action_vault_to_camera"
+            app:destination="@id/cameraFragment" />
+        <action
+            android:id="@+id/action_vault_to_addVaultItem"
+            app:destination="@id/addVaultItemFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.example.expensemanager.ui.NotificationsFragment"
+        android:label="Notifications"
+        tools:layout="@layout/fragment_notifications" />
+
+    <fragment
+        android:id="@+id/membersFragment"
+        android:name="com.example.expensemanager.ui.MembersFragment"
+        android:label="Members"
+        tools:layout="@layout/fragment_members" />
+
+    <fragment
         android:id="@+id/forgotPasswordFragment"
         android:name="com.example.expensemanager.ui.ForgotPasswordFragment"
         android:label="Reset Password"
@@ -115,24 +168,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/dashboardFragment"
-        android:name="com.example.expensemanager.ui.DashboardFragment"
-        android:label="Dashboard"
-        tools:layout="@layout/fragment_dashboard">
-        <action
-            android:id="@+id/action_dashboard_to_addAsset"
-            app:destination="@id/addAssetFragment" />
-        <action
-            android:id="@+id/action_dashboard_to_houseSetup"
-            app:destination="@id/houseSetupFragment"
-            app:popUpTo="@id/dashboardFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_dashboard_to_assets"
-            app:destination="@id/assetsFragment" />
-    </fragment>
-
-    <fragment
         android:id="@+id/assetsFragment"
         android:name="com.example.expensemanager.ui.AssetsFragment"
         android:label="Shared Assets"
@@ -147,19 +182,6 @@
         android:name="com.example.expensemanager.ui.AddAssetFragment"
         android:label="Add Asset"
         tools:layout="@layout/fragment_add_asset" />
-
-    <fragment
-        android:id="@+id/vaultFragment"
-        android:name="com.example.expensemanager.ui.VaultFragment"
-        android:label="Warranty Vault"
-        tools:layout="@layout/fragment_vault">
-        <action
-            android:id="@+id/action_vault_to_camera"
-            app:destination="@id/cameraFragment" />
-        <action
-            android:id="@+id/action_vault_to_addVaultItem"
-            app:destination="@id/addVaultItemFragment" />
-    </fragment>
 
     <fragment
         android:id="@+id/cameraFragment"
@@ -180,17 +202,5 @@
         android:name="com.example.expensemanager.ui.AddVaultItemFragment"
         android:label="Add Item"
         tools:layout="@layout/fragment_add_vault_item" />
-
-    <fragment
-        android:id="@+id/notificationsFragment"
-        android:name="com.example.expensemanager.ui.NotificationsFragment"
-        android:label="Notifications"
-        tools:layout="@layout/fragment_notifications" />
-
-    <fragment
-        android:id="@+id/membersFragment"
-        android:name="com.example.expensemanager.ui.MembersFragment"
-        android:label="Members"
-        tools:layout="@layout/fragment_members" />
 
 </navigation>

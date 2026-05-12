@@ -88,7 +88,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=" "
+                            android:text="📺"
                             android:textSize="24sp" />
 
                         <TextView
@@ -129,7 +129,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=" "
+                            android:text="⚡"
                             android:textSize="24sp" />
 
                         <TextView
@@ -170,7 +170,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=" "
+                            android:text="🛠️"
                             android:textSize="24sp" />
 
                         <TextView
@@ -211,7 +211,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=" "
+                            android:text="📦"
                             android:textSize="24sp" />
 
                         <TextView
@@ -249,7 +249,7 @@
                     android:layout_weight="1"
                     android:hint="Total Amount (BDT)"
                     app:boxStrokeColor="@color/teal_primary"
-                    app:prefixText=" ">
+                    app:prefixText="৳ ">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etAmount"
@@ -331,7 +331,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
                 android:layout_marginBottom="16dp"
-                android:text="Add Asset and Schedule Bill"
+                android:text="ADD ASSET AND SCHEDULE BILL"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/teal_dark"

@@ -12,6 +12,7 @@
 
     <!-- Receipt Guide Overlay -->
     <View
+        android:id="@+id/guideFrame"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/receipt_guide_border"
@@ -33,19 +34,52 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Capture Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnCapture"
-        android:layout_width="wrap_content"
+    <!-- Bottom Controls -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        android:src="@drawable/ic_launcher_foreground"
-        app:backgroundTint="@color/white"
-        app:fabSize="normal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:tint="@color/teal_dark" />
+        android:paddingBottom="48dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageButton
+            android:id="@+id/btnGallery"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_gallery"
+            android:contentDescription="Open Gallery"
+            app:layout_constraintTop_toTopOf="@id/btnCapture"
+            app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnCapture" />
+
+        <ImageView
+            android:id="@+id/btnCapture"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_shutter"
+            android:contentDescription="Capture Photo"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btnSwitchCamera"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_switch_camera"
+            android:contentDescription="Switch Camera"
+            app:layout_constraintTop_toTopOf="@id/btnCapture"
+            app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+            app:layout_constraintStart_toEndOf="@id/btnCapture"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageButton
         android:id="@+id/btnClose"

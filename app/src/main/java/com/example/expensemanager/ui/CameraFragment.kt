@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -36,6 +37,7 @@ class CameraFragment : Fragment() {
     private val vaultRepo = VaultRepository()
 
     private var imageCapture: ImageCapture? = null
+    private var cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -45,6 +47,17 @@ class CameraFragment : Fragment() {
         } else {
             Toast.makeText(requireContext(), "Camera permission denied", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
+        }
+    }
+
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            // Handle selected image from gallery
+            val file = File(requireContext().cacheDir, "gallery_temp.jpg")
+            requireContext().contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { output -> input.copyTo(output) }
+            }
+            uploadPhoto(file)
         }
     }
 
@@ -58,7 +71,6 @@ class CameraFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Safety check for houseId
         if (args.houseId.isBlank()) {
             Toast.makeText(requireContext(), "Error: No House ID found", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
@@ -73,6 +85,19 @@ class CameraFragment : Fragment() {
 
         binding.btnCapture.setOnClickListener { takePhoto() }
         binding.btnClose.setOnClickListener { findNavController().popBackStack() }
+        
+        binding.btnSwitchCamera.setOnClickListener {
+            cameraSelector = if (cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+                CameraSelector.DEFAULT_FRONT_CAMERA
+            } else {
+                CameraSelector.DEFAULT_BACK_CAMERA
+            }
+            startCamera()
+        }
+
+        binding.btnGallery.setOnClickListener {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
     }
 
     private fun allPermissionsGranted() = ContextCompat.checkSelfPermission(
@@ -93,8 +118,6 @@ class CameraFragment : Fragment() {
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
 
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
@@ -110,7 +133,6 @@ class CameraFragment : Fragment() {
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
-        // Visual flash feedback
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             binding.root.postDelayed({
                 binding.root.foreground = ColorDrawable(Color.WHITE)
@@ -136,7 +158,6 @@ class CameraFragment : Fragment() {
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    Log.d("CameraFragment", "Photo saved to: ${photoFile.absolutePath}")
                     uploadPhoto(photoFile)
                 }
             }
@@ -146,7 +167,6 @@ class CameraFragment : Fragment() {
     private fun uploadPhoto(file: File) {
         Toast.makeText(requireContext(), "Uploading receipt...", Toast.LENGTH_SHORT).show()
         
-        // Use viewLifecycleOwner.lifecycleScope for safer async work
         viewLifecycleOwner.lifecycleScope.launch {
             val result = if (args.warrantyItemId.isNotBlank()) {
                 vaultRepo.addReceiptToItem(args.houseId, args.warrantyItemId, file)
