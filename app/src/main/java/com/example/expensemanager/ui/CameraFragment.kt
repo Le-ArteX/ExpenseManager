@@ -19,12 +19,11 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.expensemanager.databinding.FragmentCameraBinding
 import com.example.expensemanager.repository.VaultRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
@@ -145,9 +144,10 @@ class CameraFragment : Fragment() {
     }
 
     private fun uploadPhoto(file: File) {
-        Toast.makeText(requireContext(), "Uploading...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Uploading receipt...", Toast.LENGTH_SHORT).show()
         
-        CoroutineScope(Dispatchers.Main).launch {
+        // Use viewLifecycleOwner.lifecycleScope for safer async work
+        viewLifecycleOwner.lifecycleScope.launch {
             val result = if (args.warrantyItemId.isNotBlank()) {
                 vaultRepo.addReceiptToItem(args.houseId, args.warrantyItemId, file)
             } else {
@@ -160,7 +160,7 @@ class CameraFragment : Fragment() {
             } else {
                 val error = result.exceptionOrNull()?.message ?: "Unknown error"
                 Log.e("CameraFragment", "Upload failed: $error")
-                Toast.makeText(requireContext(), "Upload failed: $error", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Error: $error", Toast.LENGTH_LONG).show()
                 binding.btnCapture.isEnabled = true
             }
         }

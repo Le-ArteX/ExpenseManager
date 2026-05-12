@@ -18,9 +18,9 @@
         android:paddingHorizontal="24dp">
 
         <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@mipmap/ic_launcher"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_flatshare_logo"
             android:layout_marginBottom="12dp"
             android:contentDescription="App Logo"/>
 

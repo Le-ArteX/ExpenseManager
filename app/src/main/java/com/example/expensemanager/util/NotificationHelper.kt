@@ -11,7 +11,8 @@ import com.example.expensemanager.MainActivity
 import com.example.expensemanager.R
 
 object NotificationHelper {
-    private const val CHANNEL_ID = "user_updates"
+    // Consistent with BillReminderService
+    private const val CHANNEL_ID = "bill_reminders"
 
     fun showNotification(context: Context, title: String, message: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -19,8 +20,8 @@ object NotificationHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "User Updates",
-                NotificationManager.IMPORTANCE_DEFAULT
+                "Bill Reminders",
+                NotificationManager.IMPORTANCE_HIGH // Crucial for heads-up
             ).apply {
                 description = "Notifications for bill updates and house activity"
             }
@@ -32,7 +33,7 @@ object NotificationHelper {
         }
         
         val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
+            context, System.currentTimeMillis().toInt(), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -40,7 +41,8 @@ object NotificationHelper {
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setPriority(NotificationCompat.PRIORITY_HIGH) // Crucial for heads-up
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()

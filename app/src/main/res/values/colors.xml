@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Brand colors from logo -->
+    <color name="brand_green">#4CAF50</color>
+    <color name="brand_light_green">#C8E6C9</color>
+
     <!-- Primary teal palette -->
     <color name="teal_primary">#00695C</color>
     <color name="teal_dark">#004D40</color>

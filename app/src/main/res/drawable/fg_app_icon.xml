@@ -4,7 +4,7 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Centered house icon within safe zone -->
+    <!-- Centered white house icon for the launcher -->
     <path
         android:fillColor="#00000000"
         android:pathData="M54,24 L26,45 V80 H45 V63 H63 V80 H82 V45 L54,24 Z"

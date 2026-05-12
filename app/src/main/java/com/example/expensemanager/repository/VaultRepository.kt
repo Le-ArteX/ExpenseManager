@@ -10,6 +10,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.example.expensemanager.model.WarrantyItem
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -27,42 +28,50 @@ class VaultRepository {
 
     /**
      * Uploads a receipt image and returns its download URL.
-     * Uses a robust chaining method to avoid "Object does not exist" errors.
+     * Fixed the "Object does not exist" error by polling for the URL after a successful upload.
      */
     suspend fun uploadReceiptImage(houseId: String, imageFile: File): Result<String> {
         val cleanHouseId = houseId.trim()
-        
         if (cleanHouseId.isEmpty() || cleanHouseId == "null") {
             return Result.failure(Exception("Invalid House ID. Please join a house first."))
         }
         
-        if (!imageFile.exists()) {
-            return Result.failure(Exception("Captured image file not found on device."))
-        }
+        if (!imageFile.exists()) return Result.failure(Exception("Captured file not found."))
 
         return try {
             val fileName = "receipt_${System.currentTimeMillis()}_${uid}.jpg"
             val ref = storage.reference.child("receipts").child(cleanHouseId).child(fileName)
             
-            Log.d("VaultRepo", "Uploading to: ${ref.path}")
+            Log.d("VaultRepo", "Uploading to Storage: ${ref.path}")
             
-            // Perform the upload
-            val uploadTask = ref.putFile(Uri.fromFile(imageFile))
+            // 1. Perform the upload
+            ref.putFile(Uri.fromFile(imageFile)).await()
             
-            // Chain the upload with download URL retrieval
-            // This ensures the URL is only requested once the upload is fully successful
-            val downloadUrl = uploadTask.continueWithTask { task ->
-                if (!task.isSuccessful) {
-                    task.exception?.let { throw it }
+            // 2. Poll for the download URL (Firebase Storage can be eventually consistent)
+            var downloadUrl: String? = null
+            var lastException: Exception? = null
+            
+            for (i in 1..5) {
+                try {
+                    // Try getting URL from the reference
+                    downloadUrl = ref.downloadUrl.await().toString()
+                    if (downloadUrl != null) break
+                } catch (e: Exception) {
+                    lastException = e
+                    Log.w("VaultRepo", "URL fetch attempt $i failed: ${e.message}")
+                    delay(1000L * i) // Incremental delay: 1s, 2s, 3s...
                 }
-                ref.downloadUrl
-            }.await().toString()
+            }
 
-            Log.d("VaultRepo", "Upload Success! URL: $downloadUrl")
-            Result.success(downloadUrl)
+            if (downloadUrl != null) {
+                Log.d("VaultRepo", "Upload Success: $downloadUrl")
+                Result.success(downloadUrl)
+            } else {
+                Result.failure(lastException ?: Exception("Uploaded but could not retrieve URL."))
+            }
         } catch (e: Exception) {
-            Log.e("VaultRepo", "Firebase Storage Error: ${e.message}", e)
-            Result.failure(Exception(e.message ?: "Upload failed"))
+            Log.e("VaultRepo", "Upload failed completely", e)
+            Result.failure(e)
         }
     }
 
@@ -78,14 +87,13 @@ class VaultRepository {
     }
 
     suspend fun addReceiptToItem(houseId: String, itemId: String, imageFile: File): Result<String> {
+        val urlResult = uploadReceiptImage(houseId, imageFile)
+        if (urlResult.isFailure) return urlResult
+        
+        val url = urlResult.getOrThrow()
         return try {
-            val urlResult = uploadReceiptImage(houseId, imageFile)
-            if (urlResult.isFailure) return urlResult
-            
-            val url = urlResult.getOrThrow()
             col(houseId).document(itemId)
                 .update("receiptImageUrls", FieldValue.arrayUnion(url)).await()
-            
             Result.success(url)
         } catch (e: Exception) {
             Result.failure(Exception("Failed to link receipt: ${e.message}"))
