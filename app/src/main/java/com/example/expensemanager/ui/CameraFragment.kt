@@ -2,7 +2,9 @@ package com.example.expensemanager.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.net.Uri
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -57,6 +59,13 @@ class CameraFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Safety check for houseId
+        if (args.houseId.isBlank()) {
+            Toast.makeText(requireContext(), "Error: No House ID found", Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
+            return
+        }
+
         if (allPermissionsGranted()) {
             startCamera()
         } else {
@@ -81,7 +90,9 @@ class CameraFragment : Fragment() {
                 it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
             }
 
-            imageCapture = ImageCapture.Builder().build()
+            imageCapture = ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .build()
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
@@ -100,10 +111,17 @@ class CameraFragment : Fragment() {
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
+        // Visual flash feedback
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            binding.root.postDelayed({
+                binding.root.foreground = ColorDrawable(Color.WHITE)
+                binding.root.postDelayed({ binding.root.foreground = null }, 50)
+            }, 100)
+        }
+
         val photoFile = File(
             requireContext().cacheDir,
-            SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
-                .format(System.currentTimeMillis()) + ".jpg"
+            "IMG_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())}.jpg"
         )
 
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
@@ -114,10 +132,12 @@ class CameraFragment : Fragment() {
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e("CameraFragment", "Photo capture failed: ${exc.message}", exc)
+                    Toast.makeText(requireContext(), "Capture failed: ${exc.message}", Toast.LENGTH_SHORT).show()
                     binding.btnCapture.isEnabled = true
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                    Log.d("CameraFragment", "Photo saved to: ${photoFile.absolutePath}")
                     uploadPhoto(photoFile)
                 }
             }
@@ -125,11 +145,10 @@ class CameraFragment : Fragment() {
     }
 
     private fun uploadPhoto(file: File) {
-        Toast.makeText(requireContext(), "Uploading receipt...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Uploading...", Toast.LENGTH_SHORT).show()
         
         CoroutineScope(Dispatchers.Main).launch {
-            // Using args.warrantyItemId != "" to avoid type mismatch error with isNotEmpty()
-            val result = if (args.warrantyItemId != "") {
+            val result = if (args.warrantyItemId.isNotBlank()) {
                 vaultRepo.addReceiptToItem(args.houseId, args.warrantyItemId, file)
             } else {
                 vaultRepo.uploadReceiptImage(args.houseId, file)
@@ -139,7 +158,9 @@ class CameraFragment : Fragment() {
                 Toast.makeText(requireContext(), "Receipt saved!", Toast.LENGTH_SHORT).show()
                 findNavController().popBackStack()
             } else {
-                Toast.makeText(requireContext(), "Upload failed: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                val error = result.exceptionOrNull()?.message ?: "Unknown error"
+                Log.e("CameraFragment", "Upload failed: $error")
+                Toast.makeText(requireContext(), "Upload failed: $error", Toast.LENGTH_LONG).show()
                 binding.btnCapture.isEnabled = true
             }
         }

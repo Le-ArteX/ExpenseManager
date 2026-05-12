@@ -45,7 +45,6 @@ class DashboardFragment : Fragment() {
         
         val currentHouseId = prefs.houseId
         if (currentHouseId.isEmpty()) {
-            // Fix: Use the correct action ID for Dashboard destination
             findNavController().navigate(R.id.action_dashboard_to_houseSetup)
             return
         }
@@ -56,9 +55,10 @@ class DashboardFragment : Fragment() {
         setupRecyclerView()
         setupFilters()
         observeData()
-        
+
+        // Navigates to the Assets list page as requested
         binding.fabAdd.setOnClickListener {
-            findNavController().navigate(R.id.action_dashboard_to_addAsset)
+            findNavController().navigate(R.id.action_dashboard_to_assets)
         }
     }
 
@@ -134,10 +134,8 @@ class DashboardFragment : Fragment() {
                         val date = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
                         binding.tvToolbarSubtitle.text = "$count members • $date"
                         
-                        // Set initials of current user
                         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
                         val currentMember = members.find { it.uid == currentUserUid }
-                        // Fix: Member uses displayName, not name
                         binding.tvProfileInitials.text = currentMember?.displayName?.take(1)?.uppercase() ?: "U"
                     }
                 }

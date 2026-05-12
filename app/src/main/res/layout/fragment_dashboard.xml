@@ -189,19 +189,26 @@
                     android:text="No pending bills!"
                     android:textSize="16sp" android:textStyle="bold"
                     android:textColor="@color/text_secondary"/>
+                <TextView android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tap + to add a shared asset"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="6dp"/>
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_add"
+        app:srcCompat="@drawable/ic_add"
         app:backgroundTint="@color/teal_dark"
         app:tint="@color/white"
-        android:contentDescription="Add bill" />
+        android:contentDescription="Add Asset" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

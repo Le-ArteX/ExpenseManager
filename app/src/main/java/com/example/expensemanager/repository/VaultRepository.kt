@@ -10,7 +10,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.example.expensemanager.model.WarrantyItem
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -28,17 +27,17 @@ class VaultRepository {
 
     /**
      * Uploads a receipt image and returns its download URL.
-     * Uses Task callbacks and a retry-poll for the download URL to prevent "Object does not exist" errors.
+     * Uses a robust chaining method to avoid "Object does not exist" errors.
      */
     suspend fun uploadReceiptImage(houseId: String, imageFile: File): Result<String> {
         val cleanHouseId = houseId.trim()
         
         if (cleanHouseId.isEmpty() || cleanHouseId == "null") {
-            return Result.failure(Exception("House ID is missing. Please join a house first."))
+            return Result.failure(Exception("Invalid House ID. Please join a house first."))
         }
         
         if (!imageFile.exists()) {
-            return Result.failure(Exception("Captured image file not found."))
+            return Result.failure(Exception("Captured image file not found on device."))
         }
 
         return try {
@@ -47,34 +46,23 @@ class VaultRepository {
             
             Log.d("VaultRepo", "Uploading to: ${ref.path}")
             
-            // 1. Perform the upload
-            val uploadTask = ref.putFile(Uri.fromFile(imageFile)).await()
+            // Perform the upload
+            val uploadTask = ref.putFile(Uri.fromFile(imageFile))
             
-            // 2. Poll for the download URL (Firebase Storage can be eventually consistent)
-            var downloadUrl: String? = null
-            var lastException: Exception? = null
-            
-            for (i in 1..3) {
-                try {
-                    // Always use the reference from the storage snapshot to be safe
-                    downloadUrl = uploadTask.storage.downloadUrl.await().toString()
-                    if (downloadUrl != null) break
-                } catch (e: Exception) {
-                    lastException = e
-                    Log.w("VaultRepo", "Download URL attempt $i failed: ${e.message}")
-                    delay(500) 
+            // Chain the upload with download URL retrieval
+            // This ensures the URL is only requested once the upload is fully successful
+            val downloadUrl = uploadTask.continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    task.exception?.let { throw it }
                 }
-            }
+                ref.downloadUrl
+            }.await().toString()
 
-            if (downloadUrl != null) {
-                Log.d("VaultRepo", "Upload Success: $downloadUrl")
-                Result.success(downloadUrl)
-            } else {
-                Result.failure(lastException ?: Exception("Uploaded but could not retrieve URL."))
-            }
+            Log.d("VaultRepo", "Upload Success! URL: $downloadUrl")
+            Result.success(downloadUrl)
         } catch (e: Exception) {
-            Log.e("VaultRepo", "Upload failed", e)
-            Result.failure(Exception("Upload failed: ${e.message}"))
+            Log.e("VaultRepo", "Firebase Storage Error: ${e.message}", e)
+            Result.failure(Exception(e.message ?: "Upload failed"))
         }
     }
 

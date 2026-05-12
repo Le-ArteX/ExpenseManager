@@ -120,19 +120,22 @@
         android:label="Dashboard"
         tools:layout="@layout/fragment_dashboard">
         <action
+            android:id="@+id/action_dashboard_to_addAsset"
+            app:destination="@id/addAssetFragment" />
+        <action
             android:id="@+id/action_dashboard_to_houseSetup"
             app:destination="@id/houseSetupFragment"
             app:popUpTo="@id/dashboardFragment"
             app:popUpToInclusive="true" />
         <action
-            android:id="@+id/action_dashboard_to_addAsset"
-            app:destination="@id/addAssetFragment" />
+            android:id="@+id/action_dashboard_to_assets"
+            app:destination="@id/assetsFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/assetsFragment"
         android:name="com.example.expensemanager.ui.AssetsFragment"
-        android:label="Assets"
+        android:label="Shared Assets"
         tools:layout="@layout/fragment_assets">
         <action
             android:id="@+id/action_assets_to_addAsset"
@@ -144,12 +147,6 @@
         android:name="com.example.expensemanager.ui.AddAssetFragment"
         android:label="Add Asset"
         tools:layout="@layout/fragment_add_asset" />
-
-    <fragment
-        android:id="@+id/notificationsFragment"
-        android:name="com.example.expensemanager.ui.NotificationsFragment"
-        android:label="Notifications"
-        tools:layout="@layout/fragment_notifications" />
 
     <fragment
         android:id="@+id/vaultFragment"
