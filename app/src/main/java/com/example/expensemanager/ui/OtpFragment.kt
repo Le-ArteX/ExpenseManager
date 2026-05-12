@@ -53,15 +53,10 @@ class OtpFragment : Fragment() {
             val isValid = authRepo.verifyOtp(args.email, otp)
             if (isValid) {
                 if (args.type == "FORGOT_PASSWORD") {
-                    // Trigger official Firebase reset link after OTP is verified
-                    val result = authRepo.resetPassword(args.email)
                     setLoading(false)
-                    if (result.isSuccess) {
-                        Toast.makeText(requireContext(), "Verified! Check your email for the final reset link.", Toast.LENGTH_LONG).show()
-                        findNavController().popBackStack(R.id.authFragment, false)
-                    } else {
-                        Toast.makeText(requireContext(), "Error sending reset link: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
-                    }
+                    // After OTP is verified, navigate to ResetPasswordFragment to set new password
+                    val action = OtpFragmentDirections.actionOtpToResetPassword(args.email)
+                    findNavController().navigate(action)
                 } else {
                     performRegistration()
                 }
