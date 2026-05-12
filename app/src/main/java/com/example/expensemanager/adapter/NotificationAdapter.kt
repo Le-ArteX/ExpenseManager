@@ -11,7 +11,8 @@ import com.example.expensemanager.databinding.ItemNotificationBinding
 import com.example.expensemanager.model.Notification
 
 class NotificationAdapter(
-    private val onNotificationClick: (Notification) -> Unit
+    private val onNotificationClick: (Notification) -> Unit,
+    private val onDeleteClick: (Notification) -> Unit
 ) : ListAdapter<Notification, NotificationAdapter.NotificationViewHolder>(DIFF_CALLBACK) {
 
     inner class NotificationViewHolder(private val binding: ItemNotificationBinding) :
@@ -32,6 +33,10 @@ class NotificationAdapter(
             
             binding.root.setOnClickListener { 
                 onNotificationClick(notification)
+            }
+
+            binding.btnDelete.setOnClickListener {
+                onDeleteClick(notification)
             }
         }
     }

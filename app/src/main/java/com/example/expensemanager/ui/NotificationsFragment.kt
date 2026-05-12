@@ -41,11 +41,16 @@ class NotificationsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = NotificationAdapter { notification ->
-            if (!notification.isRead) {
-                viewModel.markNotificationRead(notification.id)
+        adapter = NotificationAdapter(
+            onNotificationClick = { notification ->
+                if (!notification.isRead) {
+                    viewModel.markNotificationRead(notification.id)
+                }
+            },
+            onDeleteClick = { notification ->
+                viewModel.deleteNotification(notification.id)
             }
-        }
+        )
         binding.rvNotifications.adapter = adapter
     }
 

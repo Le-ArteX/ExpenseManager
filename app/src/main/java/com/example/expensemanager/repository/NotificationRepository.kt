@@ -50,4 +50,13 @@ class NotificationRepository {
             // Log error
         }
     }
+
+    suspend fun deleteNotification(houseId: String, notificationId: String): Result<Unit> {
+        return try {
+            col(houseId).document(notificationId).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

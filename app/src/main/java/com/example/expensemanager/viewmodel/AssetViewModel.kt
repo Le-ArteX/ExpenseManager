@@ -175,6 +175,12 @@ class AssetViewModel(
         }
     }
 
+    fun deleteNotification(notificationId: String) {
+        viewModelScope.launch {
+            notificationRepo.deleteNotification(_houseId.value, notificationId)
+        }
+    }
+
     fun resetState() { _uiState.value = UiState.Idle }
 
     sealed class UiState {

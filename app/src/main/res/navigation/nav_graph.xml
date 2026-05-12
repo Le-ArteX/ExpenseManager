@@ -182,6 +182,12 @@
         tools:layout="@layout/fragment_add_vault_item" />
 
     <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.example.expensemanager.ui.NotificationsFragment"
+        android:label="Notifications"
+        tools:layout="@layout/fragment_notifications" />
+
+    <fragment
         android:id="@+id/membersFragment"
         android:name="com.example.expensemanager.ui.MembersFragment"
         android:label="Members"
