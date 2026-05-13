@@ -32,6 +32,14 @@ class BillAdapter(
             val dueStr = bill.dueDate?.toDate()?.let { fmt.format(it) } ?: "—"
             binding.tvDueDate.text = "Due $dueStr · ${bill.status}"
             
+            // Notes
+            if (bill.notes.isNotEmpty()) {
+                binding.tvNotes.visibility = View.VISIBLE
+                binding.tvNotes.text = bill.notes
+            } else {
+                binding.tvNotes.visibility = View.GONE
+            }
+            
             // Colors based on status
             val statusColor = when (bill.status) {
                 "OVERDUE" -> R.color.red_error
@@ -46,7 +54,7 @@ class BillAdapter(
             
             // Category icon
             val iconRes = when (bill.category) {
-                "SUBSCRIPTION" -> R.drawable.ic_bills // In a real app, use specific icons
+                "SUBSCRIPTION" -> R.drawable.ic_bills
                 "UTILITY" -> R.drawable.ic_bills
                 "MAINTENANCE" -> R.drawable.ic_bills
                 else -> R.drawable.ic_bills
@@ -66,7 +74,7 @@ class BillAdapter(
             binding.chipGroupMembers.removeAllViews()
             bill.paidBy.forEach { (memberId, paid) ->
                 val chip = Chip(binding.root.context).apply {
-                    text = "Member" // Ideally we'd map UID to name, but for now show placeholder or UID
+                    text = "Member"
                     isCheckable = false
                     setChipBackgroundColorResource(
                         if (paid) R.color.green_light else R.color.red_light
