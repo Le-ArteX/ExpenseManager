@@ -11,7 +11,7 @@ import com.example.expensemanager.MainActivity
 import com.example.expensemanager.R
 
 object NotificationHelper {
-    // Consistent with BillReminderService
+
     private const val CHANNEL_ID = "bill_reminders"
 
     fun showNotification(context: Context, title: String, message: String) {
@@ -42,7 +42,7 @@ object NotificationHelper {
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            .setPriority(NotificationCompat.PRIORITY_HIGH) // Crucial for heads-up
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()

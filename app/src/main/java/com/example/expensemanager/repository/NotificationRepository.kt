@@ -47,7 +47,7 @@ class NotificationRepository {
         try {
             col(houseId).document(notificationId).update("isRead", true).await()
         } catch (e: Exception) {
-            // Log error
+
         }
     }
 

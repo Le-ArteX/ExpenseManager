@@ -28,7 +28,7 @@ class AssetViewModel(
     private val uid get() = Firebase.auth.currentUser?.uid ?: ""
     private val _houseId = MutableStateFlow("")
 
-    //  Exposed StateFlows
+
     val house: StateFlow<House?> = _houseId
         .filter { it.isNotEmpty() }
         .flatMapLatest { houseRepo.listenHouse(it) }
@@ -68,7 +68,7 @@ class AssetViewModel(
         .map { it.sumOf { a -> a.monthlyAmount } }
         .stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
 
-    // Simplified totals: Sum all bills regardless of month to ensure visibility
+
     val myTotalDue: StateFlow<Double> = allBills
         .map { bills -> 
             bills.filter { !it.isPaidBy(uid) }.sumOf { it.perPersonAmount() }
@@ -81,7 +81,7 @@ class AssetViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
 
-    // Category filter
+
     private val _filter = MutableStateFlow("ALL")
     val filteredBills: StateFlow<List<Bill>> = combine(pendingBills, _filter) { bills, f ->
         if (f == "ALL") bills else bills.filter { it.category == f }

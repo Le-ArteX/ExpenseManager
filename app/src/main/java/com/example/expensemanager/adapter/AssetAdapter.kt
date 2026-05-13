@@ -1,6 +1,7 @@
 package com.example.expensemanager.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -21,6 +22,13 @@ class AssetAdapter(
             binding.tvAmount.text = "৳ %.0f".format(asset.monthlyAmount)
             binding.tvPerPerson.text = "৳ %.0f / person".format(asset.perPersonAmount())
             binding.tvMemberCount.text = "${asset.splitAmong.size} members"
+
+            if (asset.notes.isNotEmpty()) {
+                binding.tvNotes.visibility = View.VISIBLE
+                binding.tvNotes.text = asset.notes
+            } else {
+                binding.tvNotes.visibility = View.GONE
+            }
             
             val iconRes = when (asset.category) {
                 "SUBSCRIPTION" -> R.drawable.ic_launcher_foreground // Replace with category icons

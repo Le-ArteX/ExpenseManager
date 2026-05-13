@@ -21,7 +21,7 @@ class VaultRepository {
     private val db = Firebase.firestore
     private val auth = Firebase.auth
     
-    // Fallback credentials hardcoded to ensure it works even if local.properties fails
+
     private val SUPABASE_URL = if (BuildConfig.SUPABASE_URL.isNotBlank() && !BuildConfig.SUPABASE_URL.contains("localhost")) {
         BuildConfig.SUPABASE_URL
     } else "https://ynlcigkmpdfgswsvntlw.supabase.co"
@@ -30,7 +30,7 @@ class VaultRepository {
         BuildConfig.SUPABASE_KEY
     } else "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlubGNpZ2ttcGRmZ3N3c3ZudGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDgxMDMsImV4cCI6MjA5NDE4NDEwM30.85Ua3ncbml5WF796yPmLznl8UcDLnR4i3M5NLnJ-Bio"
 
-    // Initialize Supabase Client
+
     private val supabase = try {
         createSupabaseClient(
             supabaseUrl = SUPABASE_URL,

@@ -36,7 +36,7 @@ class AssetRepository {
         }
     }
 
-    //  READ
+
     fun getAssets(houseId: String): Flow<List<SharedAsset>> = callbackFlow {
         if (houseId.isEmpty()) {
             trySend(emptyList())
@@ -53,7 +53,7 @@ class AssetRepository {
         awaitClose { reg.remove() }
     }
 
-    // Remove orderBy to avoid index requirement, sort on client-side
+
     fun getPendingBills(houseId: String): Flow<List<Bill>> = callbackFlow {
         if (houseId.isEmpty()) {
             trySend(emptyList())
@@ -66,7 +66,7 @@ class AssetRepository {
                     return@addSnapshotListener 
                 }
                 val bills = snap?.toObjects(Bill::class.java) ?: emptyList()
-                // Filter and sort on client-side
+
                 val pending = bills.filter { it.status in listOf("PENDING", "PARTIAL", "OVERDUE") }
                     .sortedBy { it.dueDate }
                 trySend(pending)
@@ -91,7 +91,7 @@ class AssetRepository {
         awaitClose { reg.remove() }
     }
 
-    //  UPDATE
+
     suspend fun markMemberPaid(houseId: String, billId: String, memberId: String): Result<Unit> {
         return try {
             val ref = billsCol(houseId).document(billId)
@@ -147,6 +147,7 @@ class AssetRepository {
             dueDate = Timestamp(cal.time),
             paidBy = asset.splitAmong.associateWith { false },
             status = "PENDING", 
+            notes = asset.notes,
             createdAt = Timestamp.now()
         )
         billRef.set(bill).await()

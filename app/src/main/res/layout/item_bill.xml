@@ -94,6 +94,20 @@
                 </LinearLayout>
             </RelativeLayout>
 
+            <!-- Notes field -->
+            <TextView
+                android:id="@+id/tvNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Note will appear here"
+                android:textColor="@color/teal_mid"
+                android:textSize="11sp"
+                android:textStyle="italic"
+                android:visibility="gone"
+                android:ellipsize="end"
+                android:maxLines="2"/>
+
             <!-- Progress & Members -->
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -110,10 +124,11 @@
                     android:id="@+id/btnPay"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="32dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
                     android:layout_alignParentEnd="true"
                     android:text="Pay Now"
-                    android:padding="0dp"
+                    android:padding="8dp"
                     android:textColor="@color/teal_mid"
                     android:textSize="12sp"
                     android:textAllCaps="false"/>

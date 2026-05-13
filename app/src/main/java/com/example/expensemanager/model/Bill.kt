@@ -11,6 +11,7 @@ data class Bill(
     val dueDate: Timestamp? = null,
     val status: String = "PENDING",
     val paidBy: Map<String, Boolean> = emptyMap(),
+    val notes: String = "",
     val createdAt: Timestamp? = null,
     val lastUpdatedBy: String = "",
     val lastUpdatedAt: Timestamp? = null

@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class BillReminderService : FirebaseMessagingService() {
-    // Called when a new FCM token is generated (first install or refresh)
+
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         CoroutineScope(Dispatchers.IO).launch {
@@ -33,7 +33,7 @@ class BillReminderService : FirebaseMessagingService() {
         }
     }
 
-    // Called when notification arrives while app is in FOREGROUND
+
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         val data  = message.data
@@ -67,7 +67,7 @@ class BillReminderService : FirebaseMessagingService() {
             NotificationManagerCompat.from(this)
                 .notify(System.currentTimeMillis().toInt(), notif)
         } catch (_: SecurityException) {
-            // Permission for notifications might be missing on Android 13+
+
         }
     }
 

@@ -56,7 +56,7 @@ class DashboardFragment : Fragment() {
         setupFilters()
         observeData()
 
-        // Navigates directly to Add Asset page
+
         binding.fabAdd.setOnClickListener {
             findNavController().navigate(R.id.action_dashboard_to_addAsset)
         }

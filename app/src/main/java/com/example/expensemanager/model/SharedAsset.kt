@@ -7,7 +7,6 @@ data class SharedAsset(
     val houseId: String = "",
     val name: String = "",
     val category: String = "SUBSCRIPTION",
-    // Possible values: SUBSCRIPTION | UTILITY | MAINTENANCE | OTHER
     val monthlyAmount: Double = 0.0,
     val splitAmong: List<String> = emptyList(),  // list of member UIDs
     val dueDay: Int = 1,            // day of month (1-28)

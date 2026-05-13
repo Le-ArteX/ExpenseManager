@@ -60,6 +60,7 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
+    <string name="back">Back</string>
     <string name="mark_paid">Mark My Share as Paid</string>
     <string name="paid_success">Marked as paid!</string>
     <string name="error_generic">Something went wrong. Please try again.</string>

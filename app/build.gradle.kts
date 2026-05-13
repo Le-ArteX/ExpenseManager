@@ -7,7 +7,7 @@ plugins {
     kotlin("plugin.serialization") version "2.1.0"
 }
 
-// Load local.properties (acts as .env for Android)
+
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
