@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.example.expensemanager.R
 import com.example.expensemanager.adapter.AssetAdapter
@@ -73,7 +74,12 @@ class AssetsFragment : Fragment() {
     private fun logout() {
         FirebaseAuth.getInstance().signOut()
         prefs.clear()
-        findNavController().navigate(R.id.authFragment)
+        
+        val navOptions = NavOptions.Builder()
+            .setPopUpTo(R.id.nav_graph, true)
+            .build()
+            
+        findNavController().navigate(R.id.navigation, null, navOptions)
     }
 
     private fun setupRecyclerView() {
